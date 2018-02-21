@@ -14,13 +14,15 @@
 #include <string.h>
 #include <stdint.h>
 #include <time.h>
-#include "bcm2835.h"
+#include "i2c_layer.h"
 
 //#define DBG
 #include "marte_pistorms_internal.h"
 
 char sensor_data[32] = {0};
 int data;
+
+int file;
 
 
 /*
@@ -50,7 +52,7 @@ int pistorms_port_set_type_sensor(int connector_id, int type){
   }
   
   
-  bcm2835_i2c_write(bufType,2);
+  i2c_write(file, bufType,2);
   nanosleep(&tim,NULL);
   
   return check;
@@ -80,8 +82,9 @@ int pistorms_sensor_get_mode(int connector_id){
     
   }
   
-  bcm2835_i2c_read_register_rs(&sensorMode,bufSensorMode,1);/**< Read number of bytes of the requerided register*/
-  value = bufSensorMode[0];
+  value = i2c_read(file, &sensorMode);/**< Read number of bytes of the requerided register*/
+
+  bufSensorMode[0] = value;
   return value;
   
 }
@@ -113,7 +116,7 @@ int pistorms_sensor_set_mode(int connector_id, int mode){
     
   }
   
-  bcm2835_i2c_write(bufMode,2);
+  i2c_write(file, bufMode,2);
   nanosleep(&tim,NULL);
   return check;
   
@@ -142,7 +145,7 @@ char * pistorms_sensor_read(int connector_id){
     
   }
   
-  bcm2835_i2c_read_register_rs(&sensorData,sensor_data,4);
+  int sensor_data = i2c_read(file, &sensorData);
   return sensor_data;
   
   

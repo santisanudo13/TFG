@@ -4,7 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/bcm2835.c \
 ../src/i2c_layer.c \
 ../src/marte_pistorms.c \
 ../src/marte_pistorms_brick.c \
@@ -18,7 +17,6 @@ C_SRCS += \
 ../src/objects_prueba.c 
 
 OBJS += \
-./src/bcm2835.o \
 ./src/i2c_layer.o \
 ./src/marte_pistorms.o \
 ./src/marte_pistorms_brick.o \
@@ -32,7 +30,6 @@ OBJS += \
 ./src/objects_prueba.o 
 
 C_DEPS += \
-./src/bcm2835.d \
 ./src/i2c_layer.d \
 ./src/marte_pistorms.d \
 ./src/marte_pistorms_brick.d \

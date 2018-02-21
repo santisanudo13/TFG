@@ -8,7 +8,6 @@
 #include "marte_pistorms_motors.h"
 #include "marte_pistorms_brick.h"
 #include <unistd.h>
-#include "bcm2835.h"
 
 /*
 This example is made for tracking objects, remember it is necessary to follow this steps to initialize Pistorms Brick, and I2C device with two first functions*/
@@ -53,7 +52,7 @@ int main(){
 			if(camera_objects_detected() > 0){
 				camera_object_coordinates(0, &st);
 				temp +=st.y_upper_left;
-				bcm2835_delay(1);
+//				bcm2835_delay(1);
 				j++;
 			}
 		}
@@ -77,7 +76,7 @@ int main(){
 			}
 
 			
-	bcm2835_delay(40);
+//	bcm2835_delay(40);
 		
 	}
 
