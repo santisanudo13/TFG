@@ -1,4 +1,3 @@
-#include "marte_pistorms_sensors.h"
 #include "marte_pistorms.h"
 #include "bcm2835.h"
 #include <stdio.h>

@@ -28,7 +28,7 @@ This example is made for tracking objects, remember it is necessary to follow th
 int main(){
 	
 	
-	pistorms_init(); //Initialize Pistorms
+	pistorms_init(1); //Initialize Pistorms
 
 	
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
