@@ -3,6 +3,8 @@
 #include "marte_pistorms_camera.h"
 #include "marte_pistorms.h"
 #include "marte_pistorms_internal.h"
+#include "i2c_layer.h"
+
 
 #define COMMAND_REGISTER 65 //0x41
 #define OBJECTS_DETECTED_REGISTER 66 //0x42
@@ -25,33 +27,21 @@
 #define SORT_COLOR_COMMAND 85 //0x55
 #define NO_SORT_COMMAND 88 //0x58
 
-int file;
-int camera_address;
 
-int camera_init(int address, int port){
-	file = i2c_init(address,port);
-	camera_address = address;
-	return file;
-}
-
-void camera_set_as_active_device(){
-	bcm2835_i2c_setSlaveAddress(camera_address);
-	_reset_active_bank();
-}
 
 void camera_change_address(int newAddress) {
-	i2c_write(file,COMMAND_REGISTER, 0xA0);
-	i2c_write(file,COMMAND_REGISTER, 0xAA);
-	i2c_write(file,COMMAND_REGISTER, 0xA5);
-	i2c_write(file,COMMAND_REGISTER, newAddress);
+	i2c_write(getFile(),COMMAND_REGISTER, 0xA0);
+	i2c_write(getFile(),COMMAND_REGISTER, 0xAA);
+	i2c_write(getFile(),COMMAND_REGISTER, 0xA5);
+	i2c_write(getFile(),COMMAND_REGISTER, newAddress);
 
 }
 int camera_objects_detected() {
-	if (file < 0) {
+	if (getFile() < 0) {
 		return -1;
 	}
 	char objects[1];
-	i2c_read(file, OBJECTS_DETECTED_REGISTER,objects,1);
+	objects = i2c_read(getFile(), OBJECTS_DETECTED_REGISTER, 1);
 	return objects[0];
 
 }
@@ -59,49 +49,53 @@ int camera_objects_detected() {
 
 void camera_software_version(char *buffer) {
 
-	i2c_read(file, SOFTWARE_VERSION_REGISTER_BASE,buffer,8);
+	buffer = i2c_read(getFile(), SOFTWARE_VERSION_REGISTER_BASE,8);
+
+
 }
 
 void camera_vendor_id(char *buffer) {
 
-	i2c_read(file, VENDOR_ID_REGISTER_BASE,buffer,8);
+	buffer = i2c_read(getFile(), VENDOR_ID_REGISTER_BASE,8);
+
 }
 
 void camera_device_id(char *buffer) {
 
-	i2c_read(file, DEVICE_ID_REGISTER_BASE,buffer,8);
+	buffer = i2c_read(getFile(), DEVICE_ID_REGISTER_BASE,8);
 
 }
 
 int camera_start_tracking() {
-	if (file < 0) {
+	if (getFile() < 0) {
 		return -1;
 	}
 
-	return i2c_write(file,COMMAND_REGISTER, START_TRACK_COMMAND);
+	return i2c_write(getFile(),COMMAND_REGISTER, START_TRACK_COMMAND);
 }
 
 int camera_stop_tracking() {
-	if (file < 0) {
+	if (getFile() < 0) {
 		return -1;
 	}
 
-	return i2c_write(file,COMMAND_REGISTER, STOP_TRACK_COMMAND);
+	return i2c_write(getFile(),COMMAND_REGISTER, STOP_TRACK_COMMAND);
 }
 
 int camera_reset() {
-	if (file < 0) {
+	if (getFile() < 0) {
 		return -1;
 	}
 
-	return i2c_write(file, COMMAND_REGISTER, RESET_COMMAND);
+	return i2c_write(getFile(), COMMAND_REGISTER, RESET_COMMAND);
 }
 
 int camera_object_coordinates(int object, object_properties_t * data) {
 	int reg = OBJECT_BASE + (object * 5);
 
 	char buffer[5];
-	i2c_read(file, reg, buffer, 5);
+	buffer = i2c_read(getFile(), reg,5);
+
 
 	data->color =  (int)buffer[0];
 	data->x_upper_left = (int)buffer[1];
@@ -127,13 +121,13 @@ int camera_sort_objects(int mode) {
 
 	switch (mode) {
 	case 0:
-		return i2c_write(file, COMMAND_REGISTER, SORT_SIZE_COMMAND);
+		return i2c_write(getFile(), COMMAND_REGISTER, SORT_SIZE_COMMAND);
 
 	case 1:
-		return i2c_write(file, COMMAND_REGISTER, SORT_COLOR_COMMAND);
+		return i2c_write(getFile(), COMMAND_REGISTER, SORT_COLOR_COMMAND);
 
 	case 2:
-		return i2c_write(file, COMMAND_REGISTER, NO_SORT_COMMAND);
+		return i2c_write(getFile(), COMMAND_REGISTER, NO_SORT_COMMAND);
 
 	default:
 		return -1;

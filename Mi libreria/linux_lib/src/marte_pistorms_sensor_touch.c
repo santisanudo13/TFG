@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "i2c_layer.h"
+
 
 //#define DBG
 #include "marte_pistorms_internal.h"
@@ -89,7 +91,7 @@ int pistorms_reset_touches(int connector_id){
     printf_dbg("ERROR PORT");
     
   }
-  bcm2835_i2c_write(bufReset,2);
+  i2c_write(getFile(),bufReset,2);
   return check;
   
 }

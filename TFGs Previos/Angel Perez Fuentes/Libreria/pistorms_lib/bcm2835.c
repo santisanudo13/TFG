@@ -783,7 +783,7 @@ void bcm2835_i2c_setSlaveAddress(uint8_t addr)
 #ifdef I2C_V1
     volatile uint32_t* paddr = bcm2835_bsc0 + BCM2835_BSC_A/4;
 #else	
-    volatile uint32_t* paddr = bcm2835_bsc1 + BCM2835_BSC_A/4;
+    volatile uint32_t* paddr = f + BCM2835_BSC_A/4;
 #endif
     bcm2835_peri_write(paddr, addr);
 }

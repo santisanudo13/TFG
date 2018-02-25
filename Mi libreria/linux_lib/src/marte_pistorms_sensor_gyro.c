@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "i2c_layer.h"
+
 
 //#define DBG
 #include "marte_pistorms_internal.h"

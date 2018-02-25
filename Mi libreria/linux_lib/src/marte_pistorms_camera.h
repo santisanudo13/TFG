@@ -34,14 +34,9 @@ typedef struct object {
 
 int pistorms_sensor_camera_configure(int connector_id);
 
-/*
- * @brief Function to initialize the camera working in a specific address
- * @param address: Address where the camera is placed. It can be changed by user
- * @param port: Port number where camera is conected
- */
-int camera_init(int address, int port);
 
-void camera_set_as_active_device();
+
+
 
 
 /*

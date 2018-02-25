@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "marte_pistorms_camera.h"
 #include "marte_pistorms.h"
-#include "marte_pistorms_sensors.h"
 #include "marte_pistorms_motors.h"
 #include "marte_pistorms_brick.h"
 #include <unistd.h>
@@ -16,72 +14,101 @@ This example is made for tracking objects, remember it is necessary to follow th
 #define MOTOR_2 BANK_B_PORT_2
 
 #define MOTORS_BANK_B BANK_B
-#define MAX_POSITION 557
-#define SPEED 80
-#define CENTER 87
-#define NUM_MEDIDAS 5
-#define RATIO 7.42
-#define MARGEN_MOVIMIENTO 10
-
+#define MAX_POSITION -557
 
 int main(){
-	
-	
-	pistorms_init(1); //Initialize Pistorms
 
-	
+	puts("1");
+	int value = pistorms_init(1); //Initialize Pistorms
+	printf("2, init: %d \n", value);
+
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
-	pistorms_motor_set_speed(MOTOR_1,SPEED);
+	puts("3");
 
-	camera_init(1,4); //Initialize I2C Device
-
-	camera_start_tracking(); //Send start track command to camera
-
+	pistorms_motor_reset_pos(MOTOR_1);
+	puts("4");
 
 
-	
-	object_properties_t st;
-	float pos,temp;
-	int i,j;
-	while(1){
-		temp=0;
-		j=0;
-		camera_set_as_active_device();
-		for(i=0;i<NUM_MEDIDAS;i++){
 
-			if(camera_objects_detected() > 0){
-				camera_object_coordinates(0, &st);
-				temp +=st.y_upper_left;
-//				bcm2835_delay(1);
-				j++;
-			}
-		}
-		
-			if(j > 0){
-				temp = (temp * RATIO/ j);
-		
-		
-		
-				if(temp >= MAX_POSITION)
-					temp = MAX_POSITION + CENTER;
+    pistorms_motor_set_speed(MOTOR_1,-13);//Negative speed is due to the position of the motor.
+	puts("5");
 
-				if(temp <= CENTER)
-					temp = CENTER;
+	pistorms_motor_set_pos(MOTOR_1,-200);
+	puts("6");
 
-				pos = (int)(temp - CENTER);
-				
-		
-				pistorms_motor_set_pos(MOTOR_1,pos);
-				pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK | SPEED_GO);
-			}
+	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+	puts("7");
 
-			
-//	bcm2835_delay(40);
-		
+	sleep(300);
+	puts("8");
+
+   	pistorms_motor_set_pos(MOTOR_1,-275);
+	puts("9");
+
+	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+	puts("10");
+
+	sleep(300);
+	puts("11");
+
+   	pistorms_motor_set_pos(MOTOR_1,-100);
+	puts("12");
+
+	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+
+	sleep(300);
+	puts("13");
+
+   	pistorms_motor_set_pos(MOTOR_1,-400);
+	puts("14");
+
+	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+
+	sleep(300);
+	puts("15");
+
+   	pistorms_motor_set_pos(MOTOR_1,-450);
+	puts("16");
+
+
+	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+	puts("17");
+
+
+	sleep(300);
+	puts("18");
+
+   	pistorms_motor_set_pos(MOTOR_1,0);
+	puts("19");
+
+
+	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
+	puts("20");
+
+
+	/*
+	if((pistorms_motor_get_pos(MOTOR_1)) < pos_deseada){
+
+		pistorms_motor_set_speed(MOTOR_1,15);
+	}else{
+		pistorms_motor_set_speed(MOTOR_1,-15);
 	}
 
-	
+	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 
-	
+	while((pistorms_motor_get_pos(MOTOR_1)) != pos_deseada)
+		;
+	pistorms_motor_brake(MOTOR_1);*/
+
+
+
+
+
+	sleep(1);
+
+
+
+
+
 	return 0;
 }
