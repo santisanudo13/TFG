@@ -138,7 +138,9 @@ char * pistorms_get_device_id(int connector_id){
 		return PISTORMS_ERROR_BAD_CONNECTOR;
 
 	}
-	bufSensorID = i2c_read(getFile(),&sensorID,16);
+	char* value;
+	value = i2c_read(getFile(),&sensorID,16);
+	strcpy(bufSensorID, value);
 
 
 	return bufSensorID;

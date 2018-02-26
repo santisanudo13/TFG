@@ -89,19 +89,19 @@ int pistorms_brick_led_On(int bank_id, int red, int green, int blue){
 		bufLedRed[0]=PISTORMS_LED_RED_VALUE;
 		bufLedRed[1]=red;
 
-		i2c_write(getFile(),bufLedRed,2);
+		i2c_write(getFile(),bufLedRed[0],bufLedRed[1]);
 
 		char bufLedGreen[2];
 		bufLedGreen[0]=PISTORMS_LED_GREEN_VALUE;
 		bufLedGreen[1]=green;
 
-		i2c_write(getFile(),bufLedGreen,2);
+		i2c_write(getFile(),bufLedGreen[0],bufLedGreen[1]);
 
 		char bufLedBlue[2];
 		bufLedBlue[0]=PISTORMS_LED_BLUE_VALUE;
 		bufLedBlue[1]=blue;
 
-		i2c_write(getFile(),bufLedBlue,2);
+		i2c_write(getFile(),bufLedBlue[0],bufLedBlue[1]);
 		nanosleep(&tim,NULL);
 		return check;
 
@@ -129,19 +129,19 @@ int pistorms_brick_led_Off(int bank_id){
 		bufLedRed[0]=PISTORMS_LED_RED_VALUE;
 		bufLedRed[1]= 0;
 
-		i2c_write(getFile(),bufLedRed,2);
+		i2c_write(getFile(),bufLedRed[0],bufLedRed[1]);
 
 		char bufLedGreen[2];
 		bufLedGreen[0]=PISTORMS_LED_GREEN_VALUE;
 		bufLedGreen[1]= 0;
 
-		i2c_write(getFile(), bufLedGreen,2);
+		i2c_write(getFile(),bufLedGreen[0],bufLedGreen[1]);
 
 		char bufLedBlue[2];
 		bufLedBlue[0]=PISTORMS_LED_BLUE_VALUE;
 		bufLedBlue[1]= 0;
 
-		i2c_write(getFile(),bufLedBlue,2);
+		i2c_write(getFile(),bufLedBlue[0],bufLedBlue[1]);
 		nanosleep(&tim,NULL);
 	}else{
 		printf_dbg("ERROR BANK");
@@ -159,8 +159,10 @@ char * pistorms_brick_get_firmware_version(int bank_id){
 
 	char firmwareVersion = PISTORMS_FIRMWARE_VERSION;
 	char bufFirmware[10] = {0};
+	char* value;
 
-	bufData = i2c_read(getFile(),&firmwareVersion, 8);
+	value = i2c_read(getFile(),&firmwareVersion, 8);
+	strcpy(bufData, value);
 
 	return bufData;
 
@@ -176,8 +178,10 @@ char * pistorms_brick_get_vendor_id(int bank_id){
 
 	char vendorID = PISTORMS_VENDOR_ID;
 	char bufVendorID[10] = {0};
+	char* value;
 
-	bufData = i2c_read(getFile(),&vendorID, 8);
+	value = i2c_read(getFile(),&vendorID, 8);
+	strcpy(bufData, value);
 
 	return bufData;
 
@@ -192,8 +196,12 @@ char * pistorms_brick_get_device_id(int bank_id){
 
 	char deviceID = PISTORMS_DEVICE_ID;
 	char bufDeviceID[10] = {0};
+	char* value;
 
-	bufData = i2c_read(getFile(),&deviceID, 8);
+	value = i2c_read(getFile(),&deviceID, 8);
+	strcpy(bufData, value);
+
+
 	return bufData;
 
 }
@@ -257,7 +265,7 @@ void pistorms_brick_reset_key_press_count(void){
 	bufReset[0]=PISTORMS_INPUT_BUTTON_COUNT;
 	bufReset[1]= 0;
 
-	i2c_write(getFile(),bufReset,2);
+	i2c_write(getFile(),bufReset[0],bufReset[1]);
 }
 
 /*
@@ -267,8 +275,11 @@ char bufAsisX[10] = {0};
 char * pistorms_brick_touch_screen_X_asis(void){
 
 	char asis_X = PISTORMS_INPUT_TOUCH_SCREEN_X;
+	char* value;
 
-	bufAsisX = i2c_read(getFile(),&asis_X,2);
+	value = i2c_read(getFile(),&asis_X,2);
+	strcpy(bufAsisX, value);
+
 	return bufAsisX;
 }
 
@@ -280,7 +291,10 @@ char * pistorms_brick_touch_screen_Y_asis(void){
 
 	char asis_Y = PISTORMS_INPUT_TOUCH_SCREEN_Y;
 
-	bufAsisY = i2c_read(getFile(),&asis_Y,2);
+	char* value;
+	value = i2c_read(getFile(),&asis_Y,2);
+	strcpy(bufAsisY, value);
+
 	return bufAsisY;
 
 } 

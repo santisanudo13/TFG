@@ -125,7 +125,7 @@ int pistorms_motor_go(int connector_id, char go ){
 
 	}
 
-	i2c_write(file, writeGo,2);
+	i2c_write(file, writeGo[0],writeGo[1]);
 	return check;
 }
 
@@ -169,14 +169,10 @@ long pistorms_motor_get_pos(int connector_id){
 int pistorms_motor_set_pos(int connector_id, long pos){
 
 
-	char* final_pos = (char*)&pos;
+
 
 	char writeTarget[5];
 	writeTarget[0] = 0;
-	writeTarget[1] = final_pos[0];
-	writeTarget[2] = final_pos[1];
-	writeTarget[3] = final_pos[2];
-	writeTarget[4] = final_pos[3];
 
 	int check = _set_active_bank(connector_id);
 
@@ -195,7 +191,7 @@ int pistorms_motor_set_pos(int connector_id, long pos){
 
 	}
 
-	i2c_write(file, writeTarget,5);
+	i2c_write(file, writeTarget[0], pos);
 	return check;
 
 }
@@ -225,7 +221,7 @@ int pistorms_motor_reset_pos(int connector_id){
 		return check;
 	}
 
-	i2c_write(file, writeCMD,2);
+	i2c_write(file, writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -242,8 +238,9 @@ int pistorms_motor_reset_all_parameters(int bank_id){
 	int check = _set_sync_bank(bank_id);
 
 	if ( check == 1){
+		i2c_write(file, writeCMD[0],writeCMD[1]);
 
-		i2c_write(file, writeCMD,2);
+
 		return check;
 
 	}else{
@@ -279,7 +276,7 @@ int pistorms_motor_set_speed(int connector_id,int speed){
 
 	}
 
-	i2c_write(file, writeSpeed,2);
+	i2c_write(file, writeSpeed[0],speed);
 	return check;
 
 }	
@@ -309,7 +306,7 @@ int pistorms_motor_set_running_time(int connector_id, int seconds){
 		return check;
 	}
 
-	i2c_write(file, writeTime,2);
+	i2c_write(file, writeTime[0],seconds);
 	return check;
 }
 
@@ -338,7 +335,7 @@ int pistorms_motor_float(int connector_id){
 		return check;
 	}
 
-	i2c_write(file, writeCMD,2);
+	i2c_write(file, writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -356,7 +353,7 @@ int pistorms_motor_float_sync(bank_id){
 
 	if ( check == 1){
 
-		i2c_write(file, writeCMD,2);
+		i2c_write(file, writeCMD[0],writeCMD[1]);
 		return check;
 
 	}else{
@@ -390,7 +387,7 @@ int pistorms_motor_brake(int connector_id){
 		printf("ERROR PORT");
 		return check;
 	}
-	i2c_write(file, writeCMD,2);
+	i2c_write(file, writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -407,7 +404,7 @@ int pistorms_motor_brake_sync(int bank_id){
 
 	if ( check == 1){
 
-		i2c_write(file, writeCMD,2);
+		i2c_write(file, writeCMD[0],writeCMD[1]);
 		return check;
 
 	}else{

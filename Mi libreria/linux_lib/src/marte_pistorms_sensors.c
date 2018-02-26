@@ -52,7 +52,7 @@ int pistorms_port_set_type_sensor(int connector_id, int type){
 	}
 
 
-	i2c_write(file, bufType,2);
+	i2c_write(file, bufType[0],type);
 	nanosleep(&tim,NULL);
 
 	return check;
@@ -115,7 +115,7 @@ int pistorms_sensor_set_mode(int connector_id, int mode){
 
 	}
 
-	i2c_write(file, bufMode,2);
+	i2c_write(file, bufMode[0],mode);
 	nanosleep(&tim,NULL);
 	return check;
 
@@ -143,8 +143,9 @@ char * pistorms_sensor_read(int connector_id){
 		return PISTORMS_ERROR_BAD_CONNECTOR;
 
 	}
-
-	sensor_data = i2c_read(file, &sensorData,4);
+	char* value;
+	value = i2c_read(file, &sensorData,4);
+	strcpy(sensor_data, value);
 	return sensor_data;
 
 

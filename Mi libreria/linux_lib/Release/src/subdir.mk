@@ -16,6 +16,9 @@ C_SRCS += \
 ../src/marte_pistorms_sensors.c \
 ../src/objects_prueba.c 
 
+O_SRCS += \
+../src/main.o 
+
 OBJS += \
 ./src/i2c_layer.o \
 ./src/marte_pistorms.o \

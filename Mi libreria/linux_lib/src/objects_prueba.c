@@ -18,90 +18,23 @@ This example is made for tracking objects, remember it is necessary to follow th
 
 int main(){
 
-	puts("1");
+	puts("\n\nPASO 1: INIT\n\n");
 	int value = pistorms_init(1); //Initialize Pistorms
-	printf("2, init: %d \n", value);
+	printf("\n\nPASO 2: RESET MOTORS, init value: %d \n\n", value);
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
-	puts("3");
+	sleep(3);
 
-	pistorms_motor_reset_pos(MOTOR_1);
-	puts("4");
+	puts("\n\nPASO 3: SET MOTOR 1B SPEED\n\n");
 
+	pistorms_motor_set_speed(MOTOR_1,100);
 
-
-    pistorms_motor_set_speed(MOTOR_1,-13);//Negative speed is due to the position of the motor.
-	puts("5");
-
-	pistorms_motor_set_pos(MOTOR_1,-200);
-	puts("6");
-
-	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-	puts("7");
-
-	sleep(300);
-	puts("8");
-
-   	pistorms_motor_set_pos(MOTOR_1,-275);
-	puts("9");
-
-	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-	puts("10");
-
-	sleep(300);
-	puts("11");
-
-   	pistorms_motor_set_pos(MOTOR_1,-100);
-	puts("12");
-
-	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-
-	sleep(300);
-	puts("13");
-
-   	pistorms_motor_set_pos(MOTOR_1,-400);
-	puts("14");
-
-	//pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-
-	sleep(300);
-	puts("15");
-
-   	pistorms_motor_set_pos(MOTOR_1,-450);
-	puts("16");
+	puts("\n\nPASO 4: MOTOR GO\n\n");
 
 
 	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-	puts("17");
 
-
-	sleep(300);
-	puts("18");
-
-   	pistorms_motor_set_pos(MOTOR_1,0);
-	puts("19");
-
-
-	pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK);
-	puts("20");
-
-
-	/*
-	if((pistorms_motor_get_pos(MOTOR_1)) < pos_deseada){
-
-		pistorms_motor_set_speed(MOTOR_1,15);
-	}else{
-		pistorms_motor_set_speed(MOTOR_1,-15);
-	}
-
-	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
-
-	while((pistorms_motor_get_pos(MOTOR_1)) != pos_deseada)
-		;
-	pistorms_motor_brake(MOTOR_1);*/
-
-
-
+	sleep(10);
 
 
 	sleep(1);

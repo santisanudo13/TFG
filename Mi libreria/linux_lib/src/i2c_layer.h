@@ -5,7 +5,7 @@
  * file: File used to keep the i2c communication between camera and working station.
  * reg: register to read
  */
-char* i2c_read(int file, int reg, int size);
+int i2c_read(int file, int reg, int size);
 
 /* Success: Will return byte read
  * Error: Return -1
@@ -35,3 +35,7 @@ int getFile();
  * Change value of address slave
  */
 int i2c_setSlave(int addr);
+
+
+
+int i2c_generateCommand(char* buffer, int size);

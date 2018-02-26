@@ -19,45 +19,35 @@ int getFile(){
 
 
 
-char* i2c_read(int file, int reg, int size){
+int i2c_read(int file, int command, int size){
+	int value;
+	char* buffer;
+
+
 	puts("I2C Read");
-		printf("file: %d, reg: %d, size: %d\n",file,reg,size);
+	printf("file: %d, command: %d, size: %d\n",file,command,size);
 
 
-	switch(size){
-	case 1:
+	value = i2c_smbus_read_byte_data(file,command);
+	if(value == -1)
+		puts("ERROR en la lectura");
 
-		break;
+	sprintf(buffer, "%d", value);
+	printf("value: %d, buffer: %s\n",value,buffer);
 
-	case 2:
-
-		break;
-	case 4:
-
-		break;
-
-	case 5:
-
-		break;
-
-	case 8:
-
-		break;
-
-	case 16:
-
-		break;
-	}
-
-
-
+	return 0;
 }
 
-int i2c_write(int file,int reg, int value){
+int i2c_write(int file,int command, int value){
 	puts("I2C Write");
-	printf("file: %d, reg: %d, value: %d\n",file,reg,value);
+	printf("file: %d, command: %d, value: %d\n",file,command,value);
 
-	return i2c_smbus_write_byte_data(file, reg,value);
+	int output = i2c_smbus_write_byte_data(file,command,value);
+
+	if(output == -1)
+		puts("ERROR en la escritura");
+
+	return output;
 }
 
 int i2c_init(int portNumber){
@@ -78,15 +68,11 @@ int i2c_init(int portNumber){
 	printf("file: %d\n",file);
 
 
-	i2c_setSlave(1);
 
 	if(file < 0){
 		printf("No he podido abrir el file\n");
 		return -1;
 	}
-
-
-
 
 	return 1;
 }
@@ -101,3 +87,5 @@ int i2c_setSlave(int addr){
 		return -1;
 	}
 }
+
+

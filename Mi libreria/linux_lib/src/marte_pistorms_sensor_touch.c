@@ -91,7 +91,7 @@ int pistorms_reset_touches(int connector_id){
     printf_dbg("ERROR PORT");
     
   }
-  i2c_write(getFile(),bufReset,2);
+  i2c_write(getFile(),bufReset[0],bufReset[1]);
   return check;
   
 }
