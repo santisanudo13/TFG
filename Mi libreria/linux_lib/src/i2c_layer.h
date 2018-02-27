@@ -1,3 +1,8 @@
+/**
+ * Gets value of file
+ */
+int getFile();
+
 /* Success: Will return byte read
  * Error: Return -1
  * Description: Basic function to read a value from register
@@ -5,7 +10,9 @@
  * file: File used to keep the i2c communication between camera and working station.
  * reg: register to read
  */
-int i2c_read(int file, int reg, int size);
+
+
+char* i2c_read(int file, int reg, int size);
 
 /* Success: Will return byte read
  * Error: Return -1
@@ -23,19 +30,19 @@ int i2c_write(int file,int reg, int value);
  */
 int i2c_init(int portNumber); //return
 
-
 /**
- * Gets value of file
+ * Cerramos la conexion I2C previamente inicializada.
  */
-int getFile();
+int i2c_close(void);
+
 
 
 
 /**
  * Change value of address slave
  */
-int i2c_setSlave(int addr);
+	int i2c_setSlave(int addr);
 
 
+int concatenate(int x, int y);
 
-int i2c_generateCommand(char* buffer, int size);

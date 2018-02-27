@@ -9,7 +9,8 @@
 #include <fcntl.h>
 
 #include "i2c-tools.h"
-
+//#define DBG
+#include "linux_pistorms_internal.h"
 
 int file;
 
@@ -19,39 +20,28 @@ int getFile(){
 
 
 
-int i2c_read(int file, int command, int size){
-	int value;
-	char* buffer;
-
-
-	puts("I2C Read");
-	printf("file: %d, command: %d, size: %d\n",file,command,size);
-
-
-	value = i2c_smbus_read_byte_data(file,command);
-	if(value == -1)
-		puts("ERROR en la lectura");
-
-	sprintf(buffer, "%d", value);
-	printf("value: %d, buffer: %s\n",value,buffer);
-
-	return 0;
-}
-
-int i2c_write(int file,int command, int value){
-	puts("I2C Write");
-	printf("file: %d, command: %d, value: %d\n",file,command,value);
-
-	int output = i2c_smbus_write_byte_data(file,command,value);
+char* i2c_read(int file, int command, int size){
+	int output = i2c_smbus_read_byte_data(file, command);
 
 	if(output == -1)
-		puts("ERROR en la escritura");
+		printf("ERROR en la lectura\n");
 
 	return output;
 }
 
-int i2c_init(int portNumber){
+int i2c_write(int file,int command, int value){
+	int output = i2c_smbus_write_byte_data(file,command,value);
 
+	if(output == -1)
+		printf("ERROR en la escritura\n");
+
+	return output;
+}
+
+
+
+
+int i2c_init(int portNumber){
 	char port[100];
 
 	snprintf (port, 100, "%d", 1);
@@ -63,9 +53,7 @@ int i2c_init(int portNumber){
 	strcat(devPort,port);
 
 
-	printf("%s \n",devPort);
 	file = open(devPort, O_RDWR);
-	printf("file: %d\n",file);
 
 
 
@@ -77,15 +65,25 @@ int i2c_init(int portNumber){
 	return 1;
 }
 
+int i2c_close(){
+	if(close(file) < 0 ){
+		printf("No se ha podido cerrar la conexion I2C\n");
+	}
+	return 1;
+}
+
 int i2c_setSlave(int addr){
-
-	puts("SET SLAVE");
-	printf("addr: %d, file: %d\n",addr,file);
-
 	if(ioctl(file,I2C_SLAVE, addr) < 0){
 		printf("Fallo al cambiar la direccion del I2C_SLAVE\n");
 		return -1;
 	}
 }
 
+
+int concatenate(int x, int y) {
+	int pow = 10;
+	while(y >= pow)
+		pow *= 10;
+	return x * pow + y;
+}
 
