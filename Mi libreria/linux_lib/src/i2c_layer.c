@@ -21,15 +21,22 @@ int getFile(){
 
 
 char* i2c_read(int file, int command, int size){
-	int output = i2c_smbus_read_byte_data(file, command);
+	printf_dbg("I2C Read\n");
 
-	if(output == -1)
+	char* output = malloc(size+1);
+
+	int numBytes = i2c_smbus_read_i2c_block_data(file, command, size, output);
+
+
+	if(numBytes == -1)
 		printf("ERROR en la lectura\n");
 
 	return output;
 }
 
 int i2c_write(int file,int command, int value){
+	printf_dbg("I2C Write\n");
+
 	int output = i2c_smbus_write_byte_data(file,command,value);
 
 	if(output == -1)
@@ -52,10 +59,7 @@ int i2c_init(int portNumber){
 	strcpy(devPort, dev);
 	strcat(devPort,port);
 
-
 	file = open(devPort, O_RDWR);
-
-
 
 	if(file < 0){
 		printf("No he podido abrir el file\n");
@@ -80,10 +84,5 @@ int i2c_setSlave(int addr){
 }
 
 
-int concatenate(int x, int y) {
-	int pow = 10;
-	while(y >= pow)
-		pow *= 10;
-	return x * pow + y;
-}
+
 

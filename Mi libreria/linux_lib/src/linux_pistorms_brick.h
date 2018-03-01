@@ -31,6 +31,10 @@
 #define PISTORMS_INPUT_BATTERY_VOLTAGE	0x6E
 
 
+
+int _set_active_bank_brick(int bank_id);
+
+
 /**
  * @brief Writes to the specified RGB LED. 
  * @param bank_id the Bank to turn on its led.

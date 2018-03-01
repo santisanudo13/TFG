@@ -44,5 +44,4 @@ int i2c_close(void);
 	int i2c_setSlave(int addr);
 
 
-int concatenate(int x, int y);
 

@@ -41,12 +41,11 @@ int camera_objects_detected() {
 	if (getFile() < 0) {
 		return -1;
 	}
-	int objects;
 	char* value;
 	value = i2c_read(getFile(), OBJECTS_DETECTED_REGISTER, 1);
 
-	objects = value;
-	return objects;
+
+	return value[0];
 
 }
 
@@ -97,10 +96,8 @@ int camera_reset() {
 int camera_object_coordinates(int object, object_properties_t * data) {
 	int reg = OBJECT_BASE + (object * 5);
 
-	char buffer[5];
-	char* value;
-	value = i2c_read(getFile(), reg,5);
-	strcpy(buffer, value);
+	char* buffer;
+	buffer = i2c_read(getFile(), reg,5);
 
 
 	data->color =  (int)buffer[0];

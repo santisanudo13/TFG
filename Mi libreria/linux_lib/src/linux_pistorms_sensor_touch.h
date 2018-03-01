@@ -29,7 +29,7 @@
  * or -1 if it isn't.
  * 
  */
-int pistorms_sensor_configure_touch(int connector_id);
+int pistorms_sensor_touch_configure(int connector_id);
 
 /**
  * @brief check if the sensor is touched.

@@ -145,8 +145,7 @@ char * pistorms_sensor_read(int connector_id){
 	}
 	char* value;
 	value = i2c_read(file, sensorData,4);
-	strcpy(sensor_data, value);
-	return sensor_data;
+	return value;
 
 
 }

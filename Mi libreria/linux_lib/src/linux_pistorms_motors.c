@@ -156,13 +156,14 @@ long pistorms_motor_get_pos(int connector_id){
 
 
 
-	int value = i2c_read(file, target, 4);
+	char* value = i2c_read(file, target, 4);
 
+	long output;
+	output = atol(value);
 
+	printf_debuger("Value: %s, output: %ld\n",value,output);
 
-
-
-	return value;
+	return output;
 
 }
 
@@ -345,7 +346,7 @@ int pistorms_motor_float(int connector_id){
 /*
  * Stop both the motors of said bank at the same time motors are stopped smoothly with float.
  * */
-int pistorms_motor_float_sync(bank_id){
+int pistorms_motor_float_sync(int bank_id){
 
 
 	char writeCMD[2];

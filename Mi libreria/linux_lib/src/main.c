@@ -10,6 +10,12 @@
 #include "linux_pistorms_internal.h"
 #include "linux_pistorms_motors.h"
 
+#include "linux_pistorms_sensor_ultrasonic.h"
+#include "linux_pistorms_sensor_touch.h"
+#include "linux_pistorms_sensor_gyro.h"
+#include "linux_pistorms_sensor_color.h"
+
+
 
 /*
 This example is made for tracking objects, remember it is necessary to follow this steps to initialize Pistorms Brick, and I2C device with two first functions*/
@@ -18,10 +24,11 @@ This example is made for tracking objects, remember it is necessary to follow th
 #define LED_A BANK_A
 #define LED_B BANK_B
 
-#define SENSOR_1 BANK_A_PORT_1
-#define SENSOR_2 BANK_A_PORT_2
-#define SENSOR_3 BANK_B_PORT_1
-#define SENSOR_4 BANK_B_PORT_2
+#define ULTRASONIC_ADDR BANK_B_PORT_1
+#define COLOR_ADDR BANK_B_PORT_2
+
+#define GYRO_ADDR BANK_A_PORT_1
+#define TOUCH_ADDR BANK_A_PORT_2
 
 
 
@@ -35,40 +42,89 @@ This example is made for tracking objects, remember it is necessary to follow th
 
 int value;
 
+void testSensors();
+void testMotors();
+void testBrick();
+
 int main(){
 
-	printf_dbg("\n\nPASO 1: INIT\n\n");
+	printf_debuger("\n\nPASO 1: INIT\n\n");
 	value = pistorms_init(1); //Initialize Pistorms
 
 	testBrick();
 
 	testMotors();
 
+	testSensors();
 
+
+	pistorms_close();
 
 	return 0;
 }
 
+void testSensors(){
+
+	int gyroID = 0;
+	int touchID = 0;
+	int ultraID = 0;
+	int colorID = 0;
+
+	gyroID =  pistorms_sensor_gyro_configure(GYRO_ADDR);
+	printf_debuger("\n\nGyro = %d \n\n",gyroID);
+
+	ultraID =  pistorms_sensor_ultrasonic_configure(ULTRASONIC_ADDR);
+	printf_debuger("\n\nUltra = %d \n\n",ultraID);
+
+	colorID =  pistorms_sensor_color_configure(COLOR_ADDR);
+	printf_debuger("\n\nColor = %d \n\n",colorID);
+
+	touchID =  pistorms_sensor_touch_configure(TOUCH_ADDR);
+	printf_debuger("\n\nTouch = %d \n\n",touchID);
+
+
+
+	sleep(3);
+
+	while(!pistorms_is_touched(TOUCH_ADDR) ){
+		printf_debuger("D1: %f, Color: %d, Gyro Angle: %d, Gyro Rate: %d \n", pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS), pistorms_color_measure(COLOR_ADDR), pistorms_gyro_read(GYRO_ADDR,ANGLE), pistorms_gyro_read(GYRO_ADDR,RATE));
+
+	}
+
+
+
+
+
+}
+
+
 void testBrick(){
-	printf_dbg("\n\nPASO 2\n\n");
+	printf_debuger("\n\nPASO 2\n\n");
 
-	printf_dbg("Batery: %d\n",pistorms_brick_get_battery_voltage());
+	printf_debuger("Firmware Version Bank B: %s\n",pistorms_brick_get_firmware_version(BANK_B));
+	printf_debuger("Device ID Bank B: %s\n",pistorms_brick_get_device_id(BANK_B));
+	printf_debuger("Vendor ID Bank B: %s\n",pistorms_brick_get_vendor_id(BANK_B));
+	printf_debuger("Device ID Bank A: %s\n",pistorms_brick_get_device_id(BANK_A));
+	printf_debuger("Vendor ID Bank A: %s\n",pistorms_brick_get_vendor_id(BANK_A));
 
 
-	printf_dbg("Go Counter: %d\n",pistorms_brick_get_key_press_count());
+	printf_debuger("Batery: %d\n",pistorms_brick_get_battery_voltage());
 
 
-	printf_dbg("\n\nPASO 3\n\n");
+	printf_debuger("Go Counter: %d\n",pistorms_brick_get_key_press_count());
+
+
+	printf_debuger("\n\nPASO 3: VERDE\n\n");
 	pistorms_brick_led_On(LED_A,0,255,0); //Green Led
 	pistorms_brick_led_On(LED_B,0,255,0);	//Green Led
 
 	sleep(1);
-	printf_dbg("\n\nPASO 4\n\n");
+	printf_debuger("\n\nPASO 4: ROJO\n\n");
 	pistorms_brick_led_On(LED_A,255,0,0); //Red Led
 	pistorms_brick_led_On(LED_B,255,0,0);	//Red Led
 
 	sleep(1);
-	printf_dbg("\n\nPASO 5\n\n");
+	printf_debuger("\n\nPASO 5: AZUL\n\n");
 	pistorms_brick_led_On(LED_A,0,0,255); //Blue Led
 	pistorms_brick_led_On(LED_B,0,0,255);	//Blue Led
 
@@ -80,35 +136,29 @@ void testBrick(){
 }
 
 void testMotors(){
-	printf_dbg("\n\nPASO 6: RESET MOTORS, init value: %d \n\n", value);
+	printf_debuger("\n\nPASO 6: RESET MOTORS, init value: %d \n\n", value);
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	pistorms_motor_reset_pos(MOTOR_1);
-	pistorms_motor_reset_pos(MOTOR_2);
+
 
 	sleep(1);
 
-	printf_dbg("\n\nPASO 7: SET MOTOR 1B SPEED\n\n");
-	pistorms_motor_set_speed(MOTOR_1, -100);
+	printf_debuger("\n\nPASO 7: SET MOTOR 1B SPEED\n\n");
+	pistorms_motor_set_speed(MOTOR_1, 100);
 	pistorms_motor_set_speed(MOTOR_2, 100);
 
 	pistorms_motor_set_running_time(MOTOR_1, 5);
-	pistorms_motor_set_running_time(MOTOR_2, 3);
+	pistorms_motor_set_running_time(MOTOR_2, 5);
 
-	printf_dbg("\n\nPASO 8: MOTOR GO\n\n");
+	printf_debuger("\n\nPASO 8: MOTOR GO\n\n");
 
-
-	int pos;
-	pos = pistorms_motor_go(MOTOR_1 ,TIME_GO);
-	pos = pistorms_motor_go(MOTOR_2 ,TIME_GO);
-
-	printf_dbg("Pos at GO: %d\n",pos);
+	pistorms_motor_go(MOTOR_1 ,TIME_GO);
+	pistorms_motor_go(MOTOR_2 ,TIME_GO);
 
 	for(int i=0; i<5; i++){
-		pos = pistorms_motor_get_pos(MOTOR_1);
-		printf_dbg("Pos Running: %d\n",pos);
+		printf_debuger("RUNNING, Pos1: %ld, Pos2: %ld\n",pistorms_motor_get_pos(MOTOR_1), pistorms_motor_get_pos(MOTOR_2));
 		sleep(1);
 	}
 

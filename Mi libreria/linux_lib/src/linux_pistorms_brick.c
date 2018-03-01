@@ -31,7 +31,7 @@
  * the function doesn't set again the slave address because it is not 
  * neccessary.
  */
-int _set_active_bank_brick(int bank_id);
+
 
 static char active_brick_bank = -1;
 char bufData[32] = {0};
@@ -161,12 +161,9 @@ char * pistorms_brick_get_firmware_version(int bank_id){
 	int firmwareVersion = PISTORMS_FIRMWARE_VERSION;
 	char* value;
 
-	puts("A");
 
 	value = i2c_read(getFile(),firmwareVersion, 8);
-	puts("B");
 
-	puts("C");
 
 	return value;
 
@@ -212,9 +209,9 @@ int pistorms_brick_get_battery_voltage(){
 
 	int batteryVol = PISTORMS_INPUT_BATTERY_VOLTAGE;
 
-	int value  = i2c_read(getFile(),batteryVol, 1);
+	char* value  = i2c_read(getFile(),batteryVol, 1);
 
-	return value;
+	return value[0];
 }
 
 
@@ -225,11 +222,11 @@ int pistorms_brick_get_key_press_value(){
 
 
 	int valueButton = PISTORMS_INPUT_BUTTON_VALUE;
-	int value;
 
-	value = i2c_read(getFile(),valueButton, 1);
 
-	return value;
+	char* value = i2c_read(getFile(),valueButton, 1);
+
+	return value[0];
 
 }
 
@@ -239,11 +236,10 @@ int pistorms_brick_get_key_press_value(){
 int pistorms_brick_get_key_press_count(){
 
 	int countButton = PISTORMS_INPUT_BUTTON_COUNT;
-	int value;
 
-	value = i2c_read(getFile(),countButton, 1);
+	char* value = i2c_read(getFile(),countButton, 1);
 
-	return value;
+	return value[0];
 
 }
 

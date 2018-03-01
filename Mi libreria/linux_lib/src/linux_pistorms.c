@@ -116,7 +116,7 @@ void _reset_active_bank(void){
 /*
  * Obtains the ID of the device that is plugged in the correct Bank and Port.
  * */
-char * pistorms_get_device_id(int connector_id){
+char* pistorms_get_device_id(int connector_id){
 
 	if (!initialized) {
 		return PISTORMS_ERROR_NOT_INITIALIZED;
@@ -138,9 +138,8 @@ char * pistorms_get_device_id(int connector_id){
 	}
 	char* value;
 	value = i2c_read(getFile(),sensorID,16);
-	strcpy(bufSensorID, value);
 
 
-	return bufSensorID;
+	return value;
 
 }

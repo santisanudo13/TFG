@@ -28,7 +28,7 @@ int pistorms_sensor_touch_configure(int connector_id){
   
   pistorms_port_set_type_sensor(connector_id,TOUCH_TYPE);
   
-  char *TOUCH_id;
+  char* TOUCH_id;
   TOUCH_id = pistorms_get_device_id(connector_id);
   
   if(strcmp(TOUCH_id, TOUCH_SENSOR_ID) != 0){

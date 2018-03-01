@@ -14,6 +14,7 @@
 /* Defines for MARTE_PISTORMS_INTERNAL */
 #ifndef MARTE_PISTORMS_INTERNAL
 #define MARTE_PISTORMS_INTERNAL
+#define DEBUGER
 #define DBG
 
 
@@ -22,6 +23,13 @@
 # define printf_dbg(...) printf(__VA_ARGS__)
 #else
 # define printf_dbg(...)
+#endif
+
+/*Debug*/
+#ifdef DEBUGER
+# define printf_debuger(...) printf(__VA_ARGS__)
+#else
+# define printf_debuger(...)
 #endif
 
 
