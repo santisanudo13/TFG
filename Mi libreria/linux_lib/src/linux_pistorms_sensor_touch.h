@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_sensor_touch.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 6 Feb 2017
+ * @file linux_pistorms_sensor_touch.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Driver for control the Touch of EV3 Sensor.
  * @version 1.0
  *

@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_sensor_gyro.c
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 8 Feb 2017
+ * @file linux_pistorms_sensor_gyro.c
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Driver for control the Gyro of EV3 Sensor.
  * @version 1.0
  *
@@ -28,82 +28,82 @@ static int gyro_mode = ANGLE;
  * Detects if the Gyro Sensor is connect correctly.
  * */
 int pistorms_sensor_gyro_configure(int connector_id){
-  
-  pistorms_port_set_type_sensor(connector_id,EV3_TYPE);
-  
-  char* GYRO_id;
-  GYRO_id = pistorms_get_device_id(connector_id);
-  
-  if(strcmp(GYRO_id, GYRO_SENSOR_ID) != 0){
-    
-    printf_dbg("Error ID:%s",GYRO_id);
-    return PISTORMS_ERROR_SENSOR_ID;
-    
-  }else{
-    
-    printf_dbg("ID Correcto:%s", GYRO_id);
-    return PISTORMS_REASON_OK;
-    
-  }
+
+	pistorms_port_set_type_sensor(connector_id,EV3_TYPE);
+
+	char* GYRO_id;
+	GYRO_id = pistorms_get_device_id(connector_id);
+
+	if(strcmp(GYRO_id, GYRO_SENSOR_ID) != 0){
+
+		printf_dbg("Error ID:%s",GYRO_id);
+		return PISTORMS_ERROR_SENSOR_ID;
+
+	}else{
+
+		printf_dbg("ID Correcto:%s", GYRO_id);
+		return PISTORMS_REASON_OK;
+
+	}
 }
 
 /*
  * Configure the mode of the Gyro Sensor.
  * */
 int pistorms_gyro_set_mode(int connector_id, int mode){
-  
-   int check = pistorms_sensor_set_mode(connector_id,mode);
-   
-   if (mode == ANGLE){
-     
-     gyro_mode = ANGLE;
-     
-   }else if (mode == RATE){
-     
-     gyro_mode = RATE;  
-     
-   }else{
-     
-     printf_dbg("ERROR MODE");
-     return PISTORMS_ERROR_SENSOR_MODE;
-   }
-   return check;
-  
+
+	int check = pistorms_sensor_set_mode(connector_id,mode);
+
+	if (mode == ANGLE){
+
+		gyro_mode = ANGLE;
+
+	}else if (mode == RATE){
+
+		gyro_mode = RATE;
+
+	}else{
+
+		printf_dbg("ERROR MODE");
+		return PISTORMS_ERROR_SENSOR_MODE;
+	}
+	return check;
+
 }
 
 /*
  *  Read data of the Gyro Sensor depends on the mode.
  * */
 short pistorms_gyro_read(int connector_id, int mode){
-  
-  
-  if(mode != gyro_mode){
-    
-    if(mode == ANGLE){
-      
-      printf_dbg("First ANGLE");
-      pistorms_sensor_set_mode(connector_id,ANGLE);
-      gyro_mode = ANGLE;
-      
-    }else if(mode == RATE){
-      
-      printf_dbg("First RATE");
-      pistorms_sensor_set_mode(connector_id,RATE);
-      gyro_mode = RATE;
-      
-    }else{
-      
-      printf_dbg("ERROR MODE");
-      return PISTORMS_ERROR_WRONG_CONNECTOR_ID;
-    }
-  }
-  
-  gyro_data = pistorms_sensor_read(connector_id);
 
-  unsigned short gyro =  gyro_data[0] + ( gyro_data[1] << 8);
-  short gyro_final = (short)gyro;
-  
-  return gyro_final;
+
+	if(mode != gyro_mode){
+
+		if(mode == ANGLE){
+
+			printf_dbg("First ANGLE");
+			pistorms_sensor_set_mode(connector_id,ANGLE);
+			gyro_mode = ANGLE;
+
+		}else if(mode == RATE){
+
+			printf_dbg("First RATE");
+			pistorms_sensor_set_mode(connector_id,RATE);
+			gyro_mode = RATE;
+
+		}else{
+
+			printf_dbg("ERROR MODE");
+			return PISTORMS_ERROR_WRONG_CONNECTOR_ID;
+		}
+	}
+
+	gyro_data = pistorms_sensor_read(connector_id);
+
+	unsigned short gyro =  gyro_data[0] + ( gyro_data[1] << 8);
+	short gyro_final = (short)gyro;
+
+	return gyro_final;
 }
 
 

@@ -1,3 +1,12 @@
+/**
+ * @file main.c
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
+ * @brief Small test for all sensors, motors and brick, so we can check everything works properly.
+ * @version 1.0
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_brick.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 9 Feb 2017
+ * @file linux_pistorms_brick.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Driver for control the brick of Pistorms.
  * @version 1.0
  *

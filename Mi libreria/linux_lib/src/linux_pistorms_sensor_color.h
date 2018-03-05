@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_sensor_color.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 28 Mar 2017
+ * @file linux_pistorms_sensor_color.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Driver for control the Color of EV3 Sensor.
  * @version 1.0
  *

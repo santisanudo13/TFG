@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_sensors.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 6 Feb 2017
+ * @file linux_pistorms_sensors.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Drivers for sensors from Pistorms + Raspberry PI model B.
  * @version 1.0
  *

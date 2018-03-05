@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms.c
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 17 Jan 2017
+ * @file linux_pistorms.c
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Drivers for sensors and motors from Pistorms + Raspberry PI model B.
  * @version 1.0
  *
@@ -53,17 +53,15 @@ int pistorms_init(int port){
  * */
 int pistorms_close(void){
 
+	if(i2c_close()){
 
+		end = PISTORMS_CLOSE_OK;
 
-  	  if(i2c_close()){
+	}else{
 
-    	end = PISTORMS_CLOSE_OK;
+		end = PISTORMS_ERROR_CLOSE;
 
-  	  }else{
-
-    	end = PISTORMS_ERROR_CLOSE;
-
-  	  }
+	}
 	return end;
 
 }

@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_internal.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 8 Mar 2017
+ * @file linux_pistorms_internal.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Library to add a debugger into the code.
  * @version 1.0
  *

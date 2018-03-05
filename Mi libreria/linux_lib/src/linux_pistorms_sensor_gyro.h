@@ -1,7 +1,7 @@
 /**
- * @file marte_pistorms_sensor_gyro.h
- * @author Carlos Ayerbe GonzÃ¡lez
- * @date 8 Feb 2017
+ * @file linux_pistorms_sensor_gyro.h
+ * @author Santiago Sañudo Martínez
+ * @date 5 Mar 2018
  * @brief Driver for control the Gyro of EV3 Sensor.
  * @version 1.0
  *
