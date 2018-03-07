@@ -1,9 +1,9 @@
 
 
 #include "linux_pistorms_camera.h"
-
 #include "i2c_layer.h"
 #include "linux_pistorms.h"
+#include "linux_pistorms_sensors.h"
 #include "linux_pistorms_internal.h"
 
 
@@ -28,7 +28,19 @@
 #define SORT_COLOR_COMMAND 85 //0x55
 #define NO_SORT_COMMAND 88 //0x58
 
+int camera_address = 1;
 
+int camera_init(int connector_id){
+	pistorms_port_set_type_sensor(connector_id,I2C_TYPE);
+	i2c_setSlave(camera_address);
+}
+
+void camera_set_as_active_device(){
+	printf_debuger("Set Cam Active\n");
+
+	i2c_setSlave(camera_address);
+	_reset_active_bank();
+}
 
 void camera_change_address(int newAddress) {
 	i2c_write(getFile(),COMMAND_REGISTER, 0xA0);
@@ -38,11 +50,13 @@ void camera_change_address(int newAddress) {
 
 }
 int camera_objects_detected() {
+
 	if (getFile() < 0) {
 		return -1;
 	}
 	char* value;
 	value = i2c_read(getFile(), OBJECTS_DETECTED_REGISTER, 1);
+	printf_debuger("Objects Detected: %d\n", value[0]);
 
 
 	return value[0];
@@ -94,9 +108,11 @@ int camera_reset() {
 }
 
 int camera_object_coordinates(int object, object_properties_t * data) {
+	printf_debuger("Object Coordinate\n");
+
 	int reg = OBJECT_BASE + (object * 5);
 
-	char* buffer;
+	char* buffer = malloc(5+1);;
 	buffer = i2c_read(getFile(), reg,5);
 
 
@@ -106,11 +122,11 @@ int camera_object_coordinates(int object, object_properties_t * data) {
 	data->x_lower_right = (int)buffer[3];
 	data->y_lower_right = (int)buffer[4];
 
-	printf_dbg("Value of color is %d\n",buffer[0]);
-	printf_dbg("Value of x_upper_left is %d\n",buffer[1]);
-	printf_dbg("Value of y_upper_left is %d\n",buffer[2]);
-	printf_dbg("Value of x_lower_right is %d\n",buffer[3]);
-	printf_dbg("Value of y_lower_right is %d\n",buffer[4]);
+	printf_debuger("Value of color is %d\n",buffer[0]);
+	printf_debuger("Value of x_upper_left is %d\n",buffer[1]);
+	printf_debuger("Value of y_upper_left is %d\n",buffer[2]);
+	printf_debuger("Value of x_lower_right is %d\n",buffer[3]);
+	printf_debuger("Value of y_lower_right is %d\n",buffer[4]);
 
 	if (data->x_upper_left == -1 || data->y_upper_left == -1
 			|| data->x_lower_right == -1 || data->y_lower_right == -1) {

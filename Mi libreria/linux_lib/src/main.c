@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Small test for all sensors, motors and brick, so we can check everything works properly.
  * @version 1.0
@@ -23,6 +23,7 @@
 #include "linux_pistorms_sensor_touch.h"
 #include "linux_pistorms_sensor_gyro.h"
 #include "linux_pistorms_sensor_color.h"
+#include "linux_pistorms_camera.h"
 
 
 
@@ -35,42 +36,102 @@ This example is made for tracking objects, remember it is necessary to follow th
 
 #define ULTRASONIC_ADDR BANK_B_PORT_1
 #define COLOR_ADDR BANK_B_PORT_2
-
 #define GYRO_ADDR BANK_A_PORT_1
 #define TOUCH_ADDR BANK_A_PORT_2
 
+#define CAM_ADDR BANK_B_PORT_1
 
 
 #define MOTOR_1 BANK_B_PORT_1
 #define MOTOR_2 BANK_A_PORT_1
-
 #define MOTORS_BANK_B BANK_B
 #define MOTORS_BANK_A BANK_A
 
 
+
+#define MAX_POSITION 557
+#define SPEED 80
+#define CENTER 87
+#define NUM_MEDIDAS 5
+#define RATIO 7.42
+#define MARGEN_MOVIMIENTO 10
 
 int value;
 
 void testSensors();
 void testMotors();
 void testBrick();
+void testCam();
+
 
 int main(){
 
 	printf_debuger("\n\nPASO 1: INIT\n\n");
 	value = pistorms_init(1); //Initialize Pistorms
 
-	testBrick();
+//	testBrick();
 
 	testMotors();
 
-	testSensors();
+//	testSensors();
+
+//	testCam();
 
 
 	pistorms_close();
 
 	return 0;
 }
+
+void testCam(){
+	printf_debuger("\n\nTest Cam\n\n");
+
+	camera_init(CAM_ADDR); //Initialize I2C Device
+	camera_start_tracking(); //Send start track command to camera
+
+	object_properties_t st;
+	float pos,temp;
+	int i,j;
+	while(!pistorms_is_touched(TOUCH_ADDR) ){
+		temp=0;
+		j=0;
+		camera_set_as_active_device();
+
+		for(i=0;i<5;i++){
+
+			if(camera_objects_detected() > 0){
+				camera_object_coordinates(0, &st);
+				temp +=st.y_upper_left;
+				printf_debuger("1\n");
+				i2c_delay(1);
+				printf_debuger("2\n");
+
+				j++;
+			}
+		}
+		if(j > 0){
+			temp = (temp * RATIO/ j);
+
+
+
+			if(temp >= MAX_POSITION)
+				temp = MAX_POSITION + CENTER;
+
+			if(temp <= CENTER)
+				temp = CENTER;
+
+			pos = (int)(temp - CENTER);
+
+
+			pistorms_motor_set_pos(MOTOR_1,pos);
+			pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK | SPEED_GO);
+		}
+
+
+		i2c_delay(40);
+	}
+}
+
 
 void testSensors(){
 
@@ -110,11 +171,9 @@ void testSensors(){
 void testBrick(){
 	printf_debuger("\n\nPASO 2\n\n");
 
-	printf_debuger("Firmware Version Bank B: %s\n",pistorms_brick_get_firmware_version(BANK_B));
-	printf_debuger("Device ID Bank B: %s\n",pistorms_brick_get_device_id(BANK_B));
-	printf_debuger("Vendor ID Bank B: %s\n",pistorms_brick_get_vendor_id(BANK_B));
-	printf_debuger("Device ID Bank A: %s\n",pistorms_brick_get_device_id(BANK_A));
-	printf_debuger("Vendor ID Bank A: %s\n",pistorms_brick_get_vendor_id(BANK_A));
+	printf_debuger("Firmware Version, Bank a: %s, Bank B: %s\n",pistorms_brick_get_firmware_version(BANK_A),pistorms_brick_get_firmware_version(BANK_B));
+	printf_debuger("Device ID Bank A: %s, Bank B: %s\n",pistorms_brick_get_device_id(BANK_A),pistorms_brick_get_device_id(BANK_B));
+	printf_debuger("Vendor ID Bank A: %s, Bank B: %s\n",pistorms_brick_get_vendor_id(BANK_A), pistorms_brick_get_vendor_id(BANK_B));
 
 
 	printf_debuger("Batery: %d\n",pistorms_brick_get_battery_voltage());
@@ -158,8 +217,12 @@ void testMotors(){
 	pistorms_motor_set_speed(MOTOR_1, 100);
 	pistorms_motor_set_speed(MOTOR_2, 100);
 
-	pistorms_motor_set_running_time(MOTOR_1, 5);
-	pistorms_motor_set_running_time(MOTOR_2, 5);
+	pistorms_motor_set_pos(MOTOR_1, 0);
+	pistorms_motor_set_pos(MOTOR_2, 0);
+
+
+	pistorms_motor_set_running_time(MOTOR_1, 25);
+	pistorms_motor_set_running_time(MOTOR_2, 25);
 
 	printf_debuger("\n\nPASO 8: MOTOR GO\n\n");
 

@@ -1,6 +1,6 @@
 /**
  * @file i2c_layer.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Layer that defines operations for Linux system throw I2C Protocol.
  * @version 1.0
@@ -54,6 +54,9 @@ int i2c_close(void);
  * Change value of device address to slave address
  */
 int i2c_setSlave(int addr);
-
+/**
+ * Delay of milliseconds
+ */
+void i2c_delay(int millis);
 
 

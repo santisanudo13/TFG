@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_motors.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Drivers for motors from Pistorms + Raspberry PI model B.
  * @version 1.0
@@ -156,14 +156,15 @@ long pistorms_motor_get_pos(int connector_id){
 
 
 
-	char* value = i2c_read(file, target, 4);
+	char* value = malloc(4+1);
 
-	long output;
-	output = atol(value);
+	value = i2c_read(file, target, 1);
 
-	printf_debuger("Value: %s, output: %ld\n",value,output);
 
-	return output;
+
+
+
+	return value[0];
 
 }
 

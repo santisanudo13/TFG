@@ -32,12 +32,12 @@ typedef struct object {
 } object_properties_t;
 
 
-int pistorms_sensor_camera_configure(int connector_id);
 
 
 
 
-
+int camera_init(int connector_id);
+void camera_set_as_active_device();
 
 /*
  * @brief Function used to change address of initialized camera

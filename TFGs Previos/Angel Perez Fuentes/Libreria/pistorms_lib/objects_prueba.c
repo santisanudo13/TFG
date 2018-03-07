@@ -26,11 +26,11 @@ This example is made for tracking objects, remember it is necessary to follow th
 
 
 int main(){
-	
-	
+
+
 	pistorms_init(); //Initialize Pistorms
 
-	
+
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 	pistorms_motor_set_speed(MOTOR_1,SPEED);
 
@@ -40,7 +40,7 @@ int main(){
 
 
 
-	
+
 	object_properties_t st;
 	float pos,temp;
 	int i,j;
@@ -57,32 +57,32 @@ int main(){
 				j++;
 			}
 		}
-		
-			if(j > 0){
-				temp = (temp * RATIO/ j);
-		
-		
-		
-				if(temp >= MAX_POSITION)
-					temp = MAX_POSITION + CENTER;
 
-				if(temp <= CENTER)
-					temp = CENTER;
+		if(j > 0){
+			temp = (temp * RATIO/ j);
 
-				pos = (int)(temp - CENTER);
-				
-		
-				pistorms_motor_set_pos(MOTOR_1,pos);
-				pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK | SPEED_GO);
-			}
 
-			
-	bcm2835_delay(40);
-		
+
+			if(temp >= MAX_POSITION)
+				temp = MAX_POSITION + CENTER;
+
+			if(temp <= CENTER)
+				temp = CENTER;
+
+			pos = (int)(temp - CENTER);
+
+
+			pistorms_motor_set_pos(MOTOR_1,pos);
+			pistorms_motor_go(MOTOR_1 ,ENCODER_GO | ENCODER_ACTIVE_FEEDBACK | SPEED_GO);
+		}
+
+
+		bcm2835_delay(40);
+
 	}
 
-	
 
-	
+
+
 	return 0;
 }

@@ -1,6 +1,6 @@
 /**
  * @file i2c_layer.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Layer that defines operations for Linux system throw I2C Protocol.
  * @version 1.0
@@ -34,9 +34,11 @@ int getFile(){
 }
 
 
-/* Success: Will return byte read
+/* IMPORTANT: We needed to change de I2C Clock Speed in order to be able to read properly due to a bug relate to de Raspberry Pi.
+ * We change this value in the config.txt file of the BOOT partition adding the next line: dtparam=i2c_baudrate=2500
+ * Success: Will return byte read
  * Error: Return -1
- * Description: Basic function to read a value from register
+ * Description: Basic function to read a value from register.
  * Args_
  * file: File used to keep the i2c communication between device and working station.
  * command: register to read
@@ -129,7 +131,27 @@ int i2c_setSlave(int addr){
 		return -1;
 	}
 }
+/**
+ * Delay of milliseconds
+ */
+void i2c_delay(int millis){
+	struct timespec sleeper;
 
+	    sleeper.tv_sec  = (time_t)(millis / 1000);
+	    sleeper.tv_nsec = (long)(millis % 1000) * 1000000;
+	    nanosleep(&sleeper, NULL);
+}
 
+int myAtoi(char *str)
+{
+    int res = 0; // Initialize result
 
+    // Iterate through all characters of input string and
+    // update result
+    for (int i = 0; str[i] != '\0'; ++i)
+        res = res*10 + str[i] - '0';
+
+    // return result.
+    return res;
+}
 

@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_internal.h
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Library to add a debugger into the code.
  * @version 1.0
@@ -15,7 +15,7 @@
 #ifndef MARTE_PISTORMS_INTERNAL
 #define MARTE_PISTORMS_INTERNAL
 #define DEBUGER
-#define DBG
+//#define DBG
 
 
 /*Debug*/

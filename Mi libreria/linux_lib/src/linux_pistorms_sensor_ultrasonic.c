@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_sensor_ultrasonic.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Driver for control the Ultrasonic of EV3 Sensor.
  * @version 1.0
@@ -33,7 +33,7 @@ static int presence_mode = -1;
 int pistorms_sensor_ultrasonic_configure(int connector_id){
 
 
-	pistorms_port_set_type_sensor(connector_id,EV3_TYPE);
+	pistorms_port_set_type_sensor(connector_id,I2C_TYPE);
 
 	char* ULTRASONIC_id;
 
