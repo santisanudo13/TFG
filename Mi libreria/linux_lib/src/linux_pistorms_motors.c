@@ -160,11 +160,12 @@ long pistorms_motor_get_pos(int connector_id){
 
 	value = i2c_read(file, target, 1);
 
+	unsigned long val =  value[0] + (value[1] << 8);
 
 
 
 
-	return value[0];
+	return val;
 
 }
 

@@ -39,7 +39,7 @@ This example is made for tracking objects, remember it is necessary to follow th
 #define GYRO_ADDR BANK_A_PORT_1
 #define TOUCH_ADDR BANK_A_PORT_2
 
-#define CAM_ADDR BANK_B_PORT_1
+#define CAM_ADDR 3
 
 
 #define MOTOR_1 BANK_B_PORT_1
@@ -69,11 +69,11 @@ int main(){
 	printf_debuger("\n\nPASO 1: INIT\n\n");
 	value = pistorms_init(1); //Initialize Pistorms
 
-//	testBrick();
+	testBrick();
 
 	testMotors();
 
-//	testSensors();
+	testSensors();
 
 //	testCam();
 
@@ -214,11 +214,10 @@ void testMotors(){
 	sleep(1);
 
 	printf_debuger("\n\nPASO 7: SET MOTOR 1B SPEED\n\n");
-	pistorms_motor_set_speed(MOTOR_1, 100);
-	pistorms_motor_set_speed(MOTOR_2, 100);
+	pistorms_motor_set_speed(MOTOR_1, 10);
+	pistorms_motor_set_speed(MOTOR_2, -10);
 
-	pistorms_motor_set_pos(MOTOR_1, 0);
-	pistorms_motor_set_pos(MOTOR_2, 0);
+
 
 
 	pistorms_motor_set_running_time(MOTOR_1, 25);

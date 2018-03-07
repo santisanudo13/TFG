@@ -126,6 +126,8 @@ int i2c_close(){
  */
 
 int i2c_setSlave(int addr){
+	printf_dbg("I2C Set Slave\n");
+
 	if(ioctl(file,I2C_SLAVE, addr) < 0){
 		printf("Fallo al cambiar la direccion del I2C_SLAVE\n");
 		return -1;

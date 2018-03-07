@@ -33,7 +33,7 @@ static int measure_mode = -1;
 int pistorms_sensor_color_configure(int connector_id){
 
 
-	pistorms_port_set_type_sensor(connector_id,I2C_TYPE);
+	pistorms_port_set_type_sensor(connector_id,EV3_TYPE);
 
 	char* COLOR_id;
 	COLOR_id = pistorms_get_device_id(connector_id);
