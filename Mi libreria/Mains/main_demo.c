@@ -66,9 +66,6 @@ int main(){
 	printf_debuger("\n\nPASO 1: INIT BRICK\n\n");
 	initBrick();
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
-
-
 
 	printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE GO\n\n");
 	while(!pistorms_brick_get_key_press_value()){
@@ -80,10 +77,8 @@ int main(){
 	printf_debuger("\n\nPASO 4: GO MOTORS!\n\n");
 	initMotors();
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
 
-	i2c_close();
 	return 0;
 }
 
@@ -121,34 +116,32 @@ void initMotors(){
 
 	//Avanzamos hacia delante con ambos motores al 100% de capacidad.
 	motorsForward();
-	i2c_delay(500);
-
 
 	int counter = pistorms_brick_get_key_press_count();
-	printf("GO Couner: %d \n",counter);
-
 	//Nos metemos en un bucle infinito a menos que pulsemos el boton go o el sensor de tacto
-	while(pistorms_brick_get_key_press_count() < counter+3 || !pistorms_is_touched(TOUCH_ADDR)){
+	while(pistorms_brick_get_key_press_count() == counter+3){
 		//Seguimos avanzando hasta que la distancia sea menor de 15cm.
-		while(pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS) > 15.0 || pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS) == 0.0){
-			pistorms_sensor_ultrasonic_configure(ULTRASONIC_ADDR);
-
-			printf("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
+		while(pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS) > 10.0){
 			i2c_delay(50);
 		}
-
+		// Frenamos y esperamos a que frenen los motores
+		motorsBrake();
+		i2c_delay(100);
 
 		//Comenzamos ha girar el vehiculo
-//		int angle = pistorms_gyro_read(GYRO_ADDR,RATE);
+		int angle = pistorms_gyro_read(GYRO_ADDR,RATE);
 		motorsRotate();
-		//
-		//		int diff = 0;
-		//		//Calculamos cuando hemos girado 45 grados
-		//		while(calculateDiff(angle) < 15){
-		//			printf("Diff Angle: %d \n",calculateDiff(angle));
-		//
-		//			i2c_delay(50);
-		//		}
+
+		int diff = 0;
+		//Calculamos cuando hemos girado 45 grados
+		while(calculateDiff(angle) < 15){
+
+			i2c_delay(100);
+		}
+
+		// Frenamos y esperamos a que frenen los motores
+		motorsBrake();
+		i2c_delay(100);
 
 		//Avanzamos hacia delante con ambos motores al 100% de capacidad.
 		motorsForward();
@@ -183,16 +176,11 @@ void motorsRotate(){
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	pistorms_motor_set_speed(MOTOR_1, -100);
-	pistorms_motor_set_speed(MOTOR_2, 100);
-
-
+	pistorms_motor_set_speed(MOTOR_1, -70);
+	pistorms_motor_set_speed(MOTOR_2, 70);
 
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
-
-	i2c_delay(3000);
-
 }
 
 /**
@@ -207,13 +195,19 @@ void motorsForward(){
 	pistorms_motor_set_speed(MOTOR_1, 100);
 	pistorms_motor_set_speed(MOTOR_2, 100);
 
-
-
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
-
-
 }
 
+/**
+ * Hacemos que todos los motores se paren simultaneamente.
+ */
+void motorsBrake(){
+	pistorms_brick_led_On(LED_A,255,0,0); //Blue Led
+	pistorms_brick_led_On(LED_B,255,0,0);	//Blue Led
+
+
+	pistorms_motor_brake_sync(MOTORS_BANK_A);
+}
 
 

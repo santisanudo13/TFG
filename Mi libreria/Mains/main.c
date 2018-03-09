@@ -34,10 +34,10 @@ This example is made for tracking objects, remember it is necessary to follow th
 #define LED_A BANK_A
 #define LED_B BANK_B
 
-#define ULTRASONIC_ADDR BANK_B_PORT_1
-#define COLOR_ADDR BANK_B_PORT_2
-#define GYRO_ADDR BANK_A_PORT_1
-#define TOUCH_ADDR BANK_A_PORT_2
+#define ULTRASONIC_ADDR BANK_A_PORT_1
+#define COLOR_ADDR BANK_A_PORT_2
+#define TOUCH_ADDR BANK_B_PORT_1
+#define GYRO_ADDR BANK_B_PORT_2
 
 #define CAM_ADDR 3
 
@@ -69,13 +69,15 @@ int main(){
 	printf_debuger("\n\nPASO 1: INIT\n\n");
 	value = pistorms_init(1); //Initialize Pistorms
 
+
+
 	testBrick();
 
 	testMotors();
 
 	testSensors();
 
-//	testCam();
+	//	testCam();
 
 
 	pistorms_close();
@@ -186,17 +188,17 @@ void testBrick(){
 	pistorms_brick_led_On(LED_A,0,255,0); //Green Led
 	pistorms_brick_led_On(LED_B,0,255,0);	//Green Led
 
-	sleep(1);
+	i2c_delay(1000);
 	printf_debuger("\n\nPASO 4: ROJO\n\n");
 	pistorms_brick_led_On(LED_A,255,0,0); //Red Led
 	pistorms_brick_led_On(LED_B,255,0,0);	//Red Led
 
-	sleep(1);
+	i2c_delay(1000);
 	printf_debuger("\n\nPASO 5: AZUL\n\n");
 	pistorms_brick_led_On(LED_A,0,0,255); //Blue Led
 	pistorms_brick_led_On(LED_B,0,0,255);	//Blue Led
 
-	sleep(1);
+	i2c_delay(1000);
 	pistorms_brick_led_Off(LED_A);
 	pistorms_brick_led_Off(LED_B);
 
@@ -211,17 +213,15 @@ void testMotors(){
 
 
 
-	sleep(1);
+	i2c_delay(1000);
 
 	printf_debuger("\n\nPASO 7: SET MOTOR 1B SPEED\n\n");
-	pistorms_motor_set_speed(MOTOR_1, 10);
-	pistorms_motor_set_speed(MOTOR_2, -10);
+	pistorms_motor_set_speed(MOTOR_1, 80);
+	pistorms_motor_set_speed(MOTOR_2, -80);
 
 
-
-
-	pistorms_motor_set_running_time(MOTOR_1, 25);
-	pistorms_motor_set_running_time(MOTOR_2, 25);
+	pistorms_motor_set_running_time(MOTOR_1, 5);
+	pistorms_motor_set_running_time(MOTOR_2, 5);
 
 	printf_debuger("\n\nPASO 8: MOTOR GO\n\n");
 
@@ -230,7 +230,7 @@ void testMotors(){
 
 	for(int i=0; i<5; i++){
 		printf_debuger("RUNNING, Pos1: %ld, Pos2: %ld\n",pistorms_motor_get_pos(MOTOR_1), pistorms_motor_get_pos(MOTOR_2));
-		sleep(1);
+		i2c_delay(1000);
 	}
 
 	pistorms_motor_float_sync(MOTORS_BANK_B);
