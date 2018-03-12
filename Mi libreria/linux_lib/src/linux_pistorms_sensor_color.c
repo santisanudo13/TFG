@@ -38,7 +38,6 @@ int pistorms_sensor_color_configure(int connector_id){
 	char* COLOR_id;
 	COLOR_id = pistorms_get_device_id(connector_id);
 
-	_reset_active_bank();
 
 
 	if(strcmp(COLOR_id, COLOR_SENSOR_ID) != 0){

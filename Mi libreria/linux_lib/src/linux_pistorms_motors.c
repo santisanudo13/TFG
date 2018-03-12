@@ -243,7 +243,6 @@ int pistorms_motor_reset_all_parameters(int bank_id){
 
 	int check = _set_sync_bank(bank_id);
 
-	_reset_active_bank();
 
 	if ( check == 1){
 		i2c_write(file, writeCMD[0],writeCMD[1]);

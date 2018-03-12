@@ -31,7 +31,6 @@ int pistorms_sensor_touch_configure(int connector_id){
 	char* TOUCH_id;
 	TOUCH_id = pistorms_get_device_id(connector_id);
 
-	_reset_active_bank();
 
 	if(strcmp(TOUCH_id, TOUCH_SENSOR_ID) != 0){
 

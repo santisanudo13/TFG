@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Drivers for sensors and motors from Pistorms + Raspberry PI model B.
  * @version 1.0
@@ -84,6 +84,7 @@ int _set_active_bank(int connector_id){
 			i2c_setSlave(BANK_A_ADDR);
 			active_bank = BANK_A;
 
+			_reset_active_bank();
 			return PISTORMS_REASON_OK;
 		}
 
@@ -98,11 +99,16 @@ int _set_active_bank(int connector_id){
 			printf_dbg("Slave Address = B\n");
 			i2c_setSlave(BANK_B_ADDR);
 			active_bank = BANK_B;
+
+			_reset_active_bank();
 			return PISTORMS_REASON_OK;
 		}
 
 	}
 	printf_dbg("ERROR PORT active_bank == %x\n", active_bank);
+
+
+
 	return PISTORMS_ERROR_WRONG_CONNECTOR_ID;
 
 }

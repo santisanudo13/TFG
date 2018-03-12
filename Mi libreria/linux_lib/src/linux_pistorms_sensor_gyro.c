@@ -34,7 +34,6 @@ int pistorms_sensor_gyro_configure(int connector_id){
 	char* GYRO_id;
 	GYRO_id = pistorms_get_device_id(connector_id);
 
-	_reset_active_bank();
 
 
 	if(strcmp(GYRO_id, GYRO_SENSOR_ID) != 0){

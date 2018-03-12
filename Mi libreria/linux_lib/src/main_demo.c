@@ -13,185 +13,147 @@
 #include <stdint.h>
 #include <unistd.h>
 
+
+
+#include "linux_pistorms_internal.h"
+
+#include "i2c_layer.h"
 #include "linux_pistorms.h"
 #include "linux_pistorms_brick.h"
-//#define DBG
-#include "linux_pistorms_internal.h"
 #include "linux_pistorms_motors.h"
-
 #include "linux_pistorms_sensor_ultrasonic.h"
 #include "linux_pistorms_sensor_touch.h"
 #include "linux_pistorms_sensor_gyro.h"
 #include "linux_pistorms_sensor_color.h"
 #include "linux_pistorms_camera.h"
 
-
-
-/*
-This example is made for tracking objects, remember it is necessary to follow this steps to initialize Pistorms Brick, and I2C device with two first functions*/
-
-
 #define LED_A BANK_A
 #define LED_B BANK_B
 
-#define ULTRASONIC_ADDR BANK_A_PORT_1
-#define COLOR_ADDR BANK_A_PORT_2
+#define ULTRASONIC_1_ADDR BANK_A_PORT_1
+#define ULTRASONIC_2_ADDR BANK_A_PORT_2
 #define TOUCH_ADDR BANK_B_PORT_1
-#define GYRO_ADDR BANK_B_PORT_2
-
-#define CAM_ADDR 3
 
 
 #define MOTOR_1 BANK_A_PORT_2
 #define MOTOR_2 BANK_A_PORT_1
+#define MOTOR_3 BANK_B_PORT_2
+
 #define MOTORS_BANK_A BANK_A
+#define MOTORS_BANK_B BANK_B
 
 
 
-
-int value;
-
-void initSensors();
+void rotateSensor();
+void decideSide();
 void initBrick();
 void initMotors();
+void motorsBrake();
 void motorsRotate();
 void motorsForward();
-void motorsBrake();
+void initSensors();
 
 
-
+int lado = 0;// 0 = izquierda, 1 = derecha
+float* buffer;
 
 int main(){
 
 	printf_debuger("\n\nPASO 1: INIT BRICK\n\n");
 	initBrick();
 
+	initSensors();
+
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
-
-
 
 	printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE GO\n\n");
 	while(!pistorms_brick_get_key_press_value()){
 		i2c_delay(50);
 	}
-	printf_debuger("\n\nPASO 3: INIT SENSORS\n\n");
-	initSensors();
 
 	printf_debuger("\n\nPASO 4: GO MOTORS!\n\n");
 	initMotors();
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-
 	i2c_close();
 	return 0;
 }
-
-void initSensors(){
-
-	int gyroID = 0;
-	int touchID = 0;
-	int ultraID = 0;
-	int colorID = 0;
-
-	gyroID =  pistorms_sensor_gyro_configure(GYRO_ADDR);
-	printf_debuger("\n\nGyro = %d \n\n",gyroID);
-
-	ultraID =  pistorms_sensor_ultrasonic_configure(ULTRASONIC_ADDR);
-	printf_debuger("\n\nUltra = %d \n\n",ultraID);
-
-	colorID =  pistorms_sensor_color_configure(COLOR_ADDR);
-	printf_debuger("\n\nColor = %d \n\n",colorID);
-
-	touchID =  pistorms_sensor_touch_configure(TOUCH_ADDR);
-	printf_debuger("\n\nTouch = %d \n\n",touchID);
-}
-
 
 void initBrick(){
 	pistorms_init(1); //Initialize Pistorms
 	pistorms_brick_led_On(LED_A,255,0,0); //Red Led
 	pistorms_brick_led_On(LED_B,255,0,0);	//Red Led
+}
 
+void initSensors(){
+
+	int touchID = 0;
+	int ultraID_1 = 0;
+	int ultraID_2 = 0;
+
+	ultraID_1 =  pistorms_sensor_ultrasonic_configure(ULTRASONIC_1_ADDR);
+	printf_debuger("\n\nUltra = %d \n\n",ultraID_1);
+
+	ultraID_2 =  pistorms_sensor_ultrasonic_configure(ULTRASONIC_2_ADDR);
+	printf_debuger("\n\nUltra = %d \n\n",ultraID_2);
+
+
+	touchID =  pistorms_sensor_touch_configure(TOUCH_ADDR);
+	printf_debuger("\n\nTouch = %d \n\n",touchID);
 
 }
 
 void initMotors(){
-
-
 	//Avanzamos hacia delante con ambos motores al 100% de capacidad.
 	motorsForward();
-	i2c_delay(500);
-
 
 	int counter = pistorms_brick_get_key_press_count();
-	printf("GO Couner: %d \n",counter);
+	printf_dbg("GO Counter: %d \n",counter);
 
 	//Nos metemos en un bucle infinito a menos que pulsemos el boton go o el sensor de tacto
 	while(pistorms_brick_get_key_press_count() < counter+3 || !pistorms_is_touched(TOUCH_ADDR)){
 		//Seguimos avanzando hasta que la distancia sea menor de 15cm.
-		while(pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS) > 15.0 || pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS) == 0.0){
-			pistorms_sensor_ultrasonic_configure(ULTRASONIC_ADDR);
-
-			printf("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
+		while(pistorms_ultrasonic_read_distance(ULTRASONIC_1_ADDR ,PROXIMITY_CENTIMETERS) > 15.0 ){
+			//			printf_dbg("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
 			i2c_delay(50);
 		}
 
-
-		//Comenzamos ha girar el vehiculo
-//		int angle = pistorms_gyro_read(GYRO_ADDR,RATE);
+		rotateSensor();
 		motorsRotate();
-		//
-		//		int diff = 0;
-		//		//Calculamos cuando hemos girado 45 grados
-		//		while(calculateDiff(angle) < 15){
-		//			printf("Diff Angle: %d \n",calculateDiff(angle));
-		//
-		//			i2c_delay(50);
-		//		}
 
-		//Avanzamos hacia delante con ambos motores al 100% de capacidad.
+		while(pistorms_ultrasonic_read_distance(ULTRASONIC_1_ADDR ,PROXIMITY_CENTIMETERS) < 15.0 ){
+			//			printf_dbg("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
+			i2c_delay(50);
+		}
+
+		//		//Avanzamos hacia delante con ambos motores al 100% de capacidad.
 		motorsForward();
 	}
 
-
-
-
-
-
-
-
-
 }
 
-int calculateDiff(int angle){
-	int diff = angle-pistorms_gyro_read(GYRO_ADDR,RATE);
-
-	if(diff < 0)
-		diff = diff * -1;
-
-	return diff;
-
-
-}
 /**
  * Configuramos los motores y los inicializamos de manera que el vehiculo comience a rotar sobre si mismo.
  */
 void motorsRotate(){
+
 	pistorms_brick_led_On(LED_A,0,0,255); //Blue Led
 	pistorms_brick_led_On(LED_B,0,0,255);	//Blue Led
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	pistorms_motor_set_speed(MOTOR_1, -100);
-	pistorms_motor_set_speed(MOTOR_2, 100);
-
-
+	if(lado == 1){
+		pistorms_motor_set_speed(MOTOR_1, -70);
+		pistorms_motor_set_speed(MOTOR_2, 70);
+	}
+	if(lado == 0){
+		pistorms_motor_set_speed(MOTOR_1, 70);
+		pistorms_motor_set_speed(MOTOR_2, -70);
+	}
 
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
-
-	i2c_delay(3000);
 
 }
 
@@ -204,16 +166,66 @@ void motorsForward(){
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	pistorms_motor_set_speed(MOTOR_1, 100);
-	pistorms_motor_set_speed(MOTOR_2, 100);
-
-
+	pistorms_motor_set_speed(MOTOR_1, 80);
+	pistorms_motor_set_speed(MOTOR_2, 80);
 
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
 
+}
+
+void motorsBrake(){
+	pistorms_brick_led_On(LED_A,255,0,0); //Green Led
+	pistorms_brick_led_On(LED_B,255,0,0);	//Green Led
+
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+
+	pistorms_motor_set_speed(MOTOR_1, 0);
+	pistorms_motor_set_speed(MOTOR_2, 0);
+
+	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
+	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
 
 }
 
 
 
+void rotateSensor(){
+	motorsBrake();
+
+
+	pistorms_brick_led_On(LED_A,255,0,255); //Purple Led
+	pistorms_brick_led_On(LED_B,255,0,255); //Purple Led
+
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
+
+	if(lado == 1){
+		pistorms_motor_set_speed(MOTOR_3, 24);
+		lado = 0;
+	}else{
+		pistorms_motor_set_speed(MOTOR_3, -25);
+		lado = 1;
+
+	}
+	pistorms_motor_set_running_time(MOTOR_3, 2);
+
+	pistorms_motor_go(MOTOR_3 ,TIME_GO);
+
+
+
+
+	decideSide();
+}
+
+void decideSide(){
+	buffer = malloc(sizeof(float)*100 + 1);
+
+	for(int i=0; i<100; i++){
+			buffer[i] = pistorms_ultrasonic_read_distance(ULTRASONIC_2_ADDR ,PROXIMITY_CENTIMETERS);
+		}
+
+	for(int i=0; i<100; i++){
+		printf("Buffer pos[%d]: %f\n",i, buffer[i]);
+	}
+}
