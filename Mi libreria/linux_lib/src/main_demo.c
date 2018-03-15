@@ -54,7 +54,7 @@ void motorsForward();
 void initSensors();
 
 
-int ladoMotor = 0;// 0 = izquierda, 1 = derecha
+int ladoMotor = 0;// 0 = derecha, 1 = izquierda
 int ladoRotacion = 0;// 0 = izquierda, 1 = derecha
 
 float* buffer;
@@ -68,18 +68,20 @@ int main(){
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE GO\n\n");
-	while(!pistorms_brick_get_key_press_value()){
-		i2c_delay(50);
+	while(1){
+		printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE GO\n\n");
+		while(!pistorms_brick_get_key_press_value()){
+			i2c_delay(50);
+		}
+
+		printf_debuger("\n\nPASO 4: GO MOTORS!\n\n");
+		initMotors();
+
+
+
+		motorsBrake();
 	}
 
-	printf_debuger("\n\nPASO 4: GO MOTORS!\n\n");
-	initMotors();
-
-	motorsBrake();
-
-	pistorms_close();
-	return 0;
 }
 
 void initBrick(){
@@ -145,10 +147,14 @@ void motorsRotate(){
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
 	if(ladoMotor == 1){
+		printf_debuger("Rotamos Izquierda\n");
+
 		pistorms_motor_set_speed(MOTOR_1, -70);
 		pistorms_motor_set_speed(MOTOR_2, 70);
 	}
 	if(ladoMotor == 0){
+		printf_debuger("Rotamos Derecha\n");
+
 		pistorms_motor_set_speed(MOTOR_1, 70);
 		pistorms_motor_set_speed(MOTOR_2, -70);
 	}
@@ -198,23 +204,28 @@ void rotateSensor(){
 	pistorms_brick_led_On(LED_A,255,0,255); //Purple Led
 	pistorms_brick_led_On(LED_B,255,0,255); //Purple Led
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 
-	if(ladoRotacion == 1){
-		pistorms_motor_set_speed(MOTOR_3, 24);
-		ladoRotacion = 0;
-	}else{
-		pistorms_motor_set_speed(MOTOR_3, -25);
-		ladoRotacion = 1;
 
-	}
+	pistorms_motor_set_speed(MOTOR_3, -25);
+
+
 	pistorms_motor_set_running_time(MOTOR_3, 2);
 
 	pistorms_motor_go(MOTOR_3 ,TIME_GO);
 
 
 	decideSide();
+
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
+
+	pistorms_motor_set_speed(MOTOR_3, 22);
+
+	pistorms_motor_set_running_time(MOTOR_3, 2);
+
+	pistorms_motor_go(MOTOR_3 ,TIME_GO);
+
+	i2c_delay(2000);
 }
 
 void decideSide(){
@@ -231,85 +242,64 @@ void decideSide(){
 
 	for(int i=0; i<100; i++){
 		//Rotacion ha sido hacia la derecha
-		if(ladoRotacion == 0){
-			if(i >= 0 && i < 25){
-				upRight = upRight + buffer[i];
-			}
 
-			if(i >= 25 && i < 50){
-				downRight = downRight + buffer[i];
-			}
-
-			if(i >= 50 && i < 75){
-				downLeft = downLeft + buffer[i];
-			}
-
-			if(i >= 75 && i < 100){
-				upLeft = upLeft + buffer[i];
-			}
-			upLeft = upLeft/25.0;
-			upRight = upRight/25.0;
-			downRight = downRight/25.0;
-			downLeft = downLeft/25.0;
-
-
-			//Rotacion ha sido hacia la izquierda
-		}else{
-			if(i >= 0 && i < 25){
-				upLeft = upLeft + buffer[i];
-			}
-
-			if(i >= 25 && i < 50){
-				downLeft = downLeft + buffer[i];
-			}
-
-			if(i >= 50 && i < 75){
-				downRight = downRight + buffer[i];
-			}
-			if(i >= 75 && i < 100){
-				upRight = upRight + buffer[i];
-			}
-
-			upLeft = upLeft/25.0;
-			upRight = upRight/25.0;
-			downRight = downRight/25.0;
-			downLeft = downLeft/25.0;
+		if(i >= 0 && i < 25){
+			upRight = upRight + buffer[i];
 		}
 
+		if(i >= 25 && i < 50){
+			downRight = downRight + buffer[i];
+		}
 
-		float upDiff = upRight - upLeft;
-		//Si la diferencia es superior a 5 porun lado, se gira hacia el lado que es mas pequeño, siendo 1 derecha y 0 izquierda. Si no es superior a 5º la diferencia se comprueba con la zona inferior
-		//y si tampoco lo es directamente se deja como estaba.
+		if(i >= 50 && i < 75){
+			downLeft = downLeft + buffer[i];
+		}
 
-		int modificado = 0;
-		if(upDiff < 0){
-			upDiff = upDiff * -1;
-			if(upDiff >5){
+		if(i >= 75 && i < 100){
+			upLeft = upLeft + buffer[i];
+		}
+	}
+	upLeft = upLeft/25.0;
+	upRight = upRight/25.0;
+	downRight = downRight/25.0;
+	downLeft = downLeft/25.0;
+
+
+	printf_debuger("UpL: %f, UpR: %f, DwL: %f, DwR: %f \n", upLeft,upRight,downLeft,downRight);
+
+	float upDiff = upRight - upLeft;
+	//Si la diferencia es superior a 5 porun lado, se gira hacia el lado que es mas pequeño, siendo 1 derecha y 0 izquierda. Si no es superior a 5º la diferencia se comprueba con la zona inferior
+	//y si tampoco lo es directamente se deja como estaba.
+
+	int modificado = 0;
+	if(upDiff < 0){
+		upDiff = upDiff * -1;
+		if(upDiff >5){
+			ladoMotor = 1;
+			modificado = 1;
+		}
+	}else{
+		if(upDiff >5){
+			ladoMotor = 0;
+			modificado = 1;
+		}
+	}
+	if(!modificado){
+		float downDiff = downRight - downLeft;
+
+
+		if(downDiff < 0){
+			downDiff = downDiff * -1;
+			if(downDiff >5){
 				ladoMotor = 1;
 				modificado = 1;
 			}
 		}else{
-			if(upDiff >5){
+			if(downDiff >5){
 				ladoMotor = 0;
 				modificado = 1;
 			}
 		}
-		if(!modificado){
-			float downDiff = downRight - downLeft;
-
-
-			if(downDiff < 0){
-				downDiff = downDiff * -1;
-				if(downDiff >5){
-					ladoMotor = 1;
-					modificado = 1;
-				}
-			}else{
-				if(downDiff >5){
-					ladoMotor = 0;
-					modificado = 1;
-				}
-			}
-		}
 	}
+
 }
