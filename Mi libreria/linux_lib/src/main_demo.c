@@ -47,14 +47,16 @@
 void rotateSensor();
 void decideSide();
 void initBrick();
-void initMotors();
+int initMotors();
 void motorsBrake();
 void motorsRotate();
 void motorsForward();
 void initSensors();
 
 
-int lado = 0;// 0 = izquierda, 1 = derecha
+int ladoMotor = 0;// 0 = izquierda, 1 = derecha
+int ladoRotacion = 0;// 0 = izquierda, 1 = derecha
+
 float* buffer;
 
 int main(){
@@ -74,9 +76,9 @@ int main(){
 	printf_debuger("\n\nPASO 4: GO MOTORS!\n\n");
 	initMotors();
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+	motorsBrake();
 
-	i2c_close();
+	pistorms_close();
 	return 0;
 }
 
@@ -104,27 +106,26 @@ void initSensors(){
 
 }
 
-void initMotors(){
+int initMotors(){
 	//Avanzamos hacia delante con ambos motores al 100% de capacidad.
 	motorsForward();
 
-	int counter = pistorms_brick_get_key_press_count();
-	printf_dbg("GO Counter: %d \n",counter);
+
 
 	//Nos metemos en un bucle infinito a menos que pulsemos el boton go o el sensor de tacto
-	while(pistorms_brick_get_key_press_count() < counter+3 || !pistorms_is_touched(TOUCH_ADDR)){
+	while(1){
 		//Seguimos avanzando hasta que la distancia sea menor de 15cm.
 		while(pistorms_ultrasonic_read_distance(ULTRASONIC_1_ADDR ,PROXIMITY_CENTIMETERS) > 15.0 ){
-			//			printf_dbg("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
-			i2c_delay(50);
+			if(pistorms_is_touched(TOUCH_ADDR))
+				return 1;
 		}
 
 		rotateSensor();
 		motorsRotate();
 
 		while(pistorms_ultrasonic_read_distance(ULTRASONIC_1_ADDR ,PROXIMITY_CENTIMETERS) < 15.0 ){
-			//			printf_dbg("Distance: %f \n",pistorms_ultrasonic_read_distance(ULTRASONIC_ADDR ,PROXIMITY_CENTIMETERS));
-			i2c_delay(50);
+			if(pistorms_is_touched(TOUCH_ADDR))
+				return 1;
 		}
 
 		//		//Avanzamos hacia delante con ambos motores al 100% de capacidad.
@@ -143,11 +144,11 @@ void motorsRotate(){
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
-	if(lado == 1){
+	if(ladoMotor == 1){
 		pistorms_motor_set_speed(MOTOR_1, -70);
 		pistorms_motor_set_speed(MOTOR_2, 70);
 	}
-	if(lado == 0){
+	if(ladoMotor == 0){
 		pistorms_motor_set_speed(MOTOR_1, 70);
 		pistorms_motor_set_speed(MOTOR_2, -70);
 	}
@@ -200,19 +201,17 @@ void rotateSensor(){
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 
-	if(lado == 1){
+	if(ladoRotacion == 1){
 		pistorms_motor_set_speed(MOTOR_3, 24);
-		lado = 0;
+		ladoRotacion = 0;
 	}else{
 		pistorms_motor_set_speed(MOTOR_3, -25);
-		lado = 1;
+		ladoRotacion = 1;
 
 	}
 	pistorms_motor_set_running_time(MOTOR_3, 2);
 
 	pistorms_motor_go(MOTOR_3 ,TIME_GO);
-
-
 
 
 	decideSide();
@@ -222,10 +221,95 @@ void decideSide(){
 	buffer = malloc(sizeof(float)*100 + 1);
 
 	for(int i=0; i<100; i++){
-			buffer[i] = pistorms_ultrasonic_read_distance(ULTRASONIC_2_ADDR ,PROXIMITY_CENTIMETERS);
-		}
+		buffer[i] = pistorms_ultrasonic_read_distance(ULTRASONIC_2_ADDR ,PROXIMITY_CENTIMETERS);
+	}
+
+	float upLeft = 0.0;
+	float upRight = 0.0;
+	float downRight = 0.0;
+	float downLeft = 0.0;
 
 	for(int i=0; i<100; i++){
-		printf("Buffer pos[%d]: %f\n",i, buffer[i]);
+		//Rotacion ha sido hacia la derecha
+		if(ladoRotacion == 0){
+			if(i >= 0 && i < 25){
+				upRight = upRight + buffer[i];
+			}
+
+			if(i >= 25 && i < 50){
+				downRight = downRight + buffer[i];
+			}
+
+			if(i >= 50 && i < 75){
+				downLeft = downLeft + buffer[i];
+			}
+
+			if(i >= 75 && i < 100){
+				upLeft = upLeft + buffer[i];
+			}
+			upLeft = upLeft/25.0;
+			upRight = upRight/25.0;
+			downRight = downRight/25.0;
+			downLeft = downLeft/25.0;
+
+
+			//Rotacion ha sido hacia la izquierda
+		}else{
+			if(i >= 0 && i < 25){
+				upLeft = upLeft + buffer[i];
+			}
+
+			if(i >= 25 && i < 50){
+				downLeft = downLeft + buffer[i];
+			}
+
+			if(i >= 50 && i < 75){
+				downRight = downRight + buffer[i];
+			}
+			if(i >= 75 && i < 100){
+				upRight = upRight + buffer[i];
+			}
+
+			upLeft = upLeft/25.0;
+			upRight = upRight/25.0;
+			downRight = downRight/25.0;
+			downLeft = downLeft/25.0;
+		}
+
+
+		float upDiff = upRight - upLeft;
+		//Si la diferencia es superior a 5 porun lado, se gira hacia el lado que es mas pequeño, siendo 1 derecha y 0 izquierda. Si no es superior a 5º la diferencia se comprueba con la zona inferior
+		//y si tampoco lo es directamente se deja como estaba.
+
+		int modificado = 0;
+		if(upDiff < 0){
+			upDiff = upDiff * -1;
+			if(upDiff >5){
+				ladoMotor = 1;
+				modificado = 1;
+			}
+		}else{
+			if(upDiff >5){
+				ladoMotor = 0;
+				modificado = 1;
+			}
+		}
+		if(!modificado){
+			float downDiff = downRight - downLeft;
+
+
+			if(downDiff < 0){
+				downDiff = downDiff * -1;
+				if(downDiff >5){
+					ladoMotor = 1;
+					modificado = 1;
+				}
+			}else{
+				if(downDiff >5){
+					ladoMotor = 0;
+					modificado = 1;
+				}
+			}
+		}
 	}
 }
