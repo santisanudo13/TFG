@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("AAAA","1");
 
 
-                Process process = Runtime.getRuntime().exec("echo a >> /storage/emulated/obb/holi.txt");
+                Process process = Runtime.getRuntime().exec("/data/local/tmp/main.o");
 
                 process.waitFor();
 

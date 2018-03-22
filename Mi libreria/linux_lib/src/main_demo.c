@@ -150,14 +150,14 @@ void motorsRotate(){
 	if(ladoMotor == 1){
 		printf_debuger("Rotamos Izquierda\n");
 
-		pistorms_motor_set_speed(MOTOR_1, -50);
-		pistorms_motor_set_speed(MOTOR_2,  50);
+		pistorms_motor_set_speed(MOTOR_1, -70);
+		pistorms_motor_set_speed(MOTOR_2,  70);
 	}
 	if(ladoMotor == 0){
 		printf_debuger("Rotamos Derecha\n");
 
-		pistorms_motor_set_speed(MOTOR_1,  50);
-		pistorms_motor_set_speed(MOTOR_2, -50);
+		pistorms_motor_set_speed(MOTOR_1,  70);
+		pistorms_motor_set_speed(MOTOR_2, -70);
 	}
 
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
@@ -224,7 +224,7 @@ void rotateSensor(){
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 
-	pistorms_motor_set_speed(MOTOR_3, 23);
+	pistorms_motor_set_speed(MOTOR_3, 22);
 
 	pistorms_motor_set_running_time(MOTOR_3, 2);
 
