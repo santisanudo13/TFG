@@ -2,7 +2,7 @@
  * @file main.c
  * @author Santiago Sa�udo Mart�nez
  * @date 5 Mar 2018
- * @brief Small test for all sensors, motors and brick, so we can check everything works properly.
+ * @brief Small test for all sensors, motors and brick, so we can check everything works properly. It makes a vehicule move properly avoiding any obstacles in front of it.
  * @version 1.0
  *
  */
@@ -69,7 +69,7 @@ int main(){
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
 	while(1){
-		printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE GO\n\n");
+		printf_debuger("\n\nPASO 2: ESPERANDO A QUE SE PULSE EL SENSOR TACTIL\n\n");
 		while(!pistorms_is_touched(TOUCH_ADDR)){
 			i2c_delay(50);
 		}
