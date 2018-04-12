@@ -6,7 +6,9 @@
  * @version 1.0
  *
  */
+#include <math.h>
 
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,19 +49,6 @@
 #define MOTORS_BANK_A BANK_A
 
 
-/**
- * Cabaceras de metodos empleados
- */
-void setLedsColor(int red, int green, int blue);
-void initBrick();
-void initSensors();
-void calibrateGyro();
-void readGyroAndMotors();
-void saveMotorSpeed();
-void calculateMotorSpeed();
-void motorsGo();
-void updateGyroOffset();
-
 
 /**
  * Variables globales
@@ -69,11 +58,10 @@ void updateGyroOffset();
 
 
 // Medida del tiempo
-uint32_t WAIT_TIME_MS = 10;
 
-int32_t loopTimeMilliSec = 10;
+int loopTimeMilliSec = 10;
 
-float loopTimeSec = loopTimeMilliSec/1000.0;
+float loopTimeSec = 0;
 
 time_t tLoopStart, tLoopEnd;
 
@@ -81,39 +69,39 @@ int motor_speed = 20;
 #define M_PI 3.14159265358979323846
 
 // Radianes por grado
-float radiansPerDegree = M_PI/180;
+float radiansPerDegree = 0;
 
 // Grados/s por unidad del giroscopio
-int32_t degPerSecondPerRawGyroUnit = 1;
+int degPerSecondPerRawGyroUnit = 1;
 
 // Radianes/s por unidad del giroscopio
-float radiansPerSecondPerRawGyroUnit = degPerSecondPerRawGyroUnit * radiansPerDegree;
+float radiansPerSecondPerRawGyroUnit = 0;
 // Grados por unidad de motor
-int32_t degPerRawMotorUnit = 1;
+int degPerRawMotorUnit = 1;
 
 // Radianes por unidad de motor
-float radiansPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
+float radiansPerRawMotorUnit = 0;
 
 // RPM por unidad de motor
-float RPMperPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
+float RPMperPerRawMotorUnit = 0;
 
 // RPM por velocidad
 float RPMperPerPercentSpeed = 1.7;
 
 // Grados/s por velocidad
-float degPersecPerPercentSpeed = RPMperPerPercentSpeed * 360/60;
+float degPersecPerPercentSpeed = 0;
 
 // Radianes/s por velocidad
-float radPerSecPerPercentSpeed = degPersecPerPercentSpeed * radiansPerDegree;
+float radPerSecPerPercentSpeed = 0;
 
 // Velocidad a la que compensamos el offset del giroscopio
-float gyroDriftCompensationRate = 0.1 * loopTimeSec * radiansPerSecondPerRawGyroUnit;
+float gyroDriftCompensationRate = 0;
 
 // Array que guarda las posiciones del motor anteriores
-float motorAngleHistory[3];updateGyroOffsted();
+float motorAngleHistory[3];
 
 // Ganancias de control
-int32_t gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
+int gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
 //float gainGyroAngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
 
 // Señal del ángulo del motor (en grados)
@@ -144,7 +132,7 @@ float motorAngularSpeedError = 0;
 float motorDutyCycle = 0;
 
 // El valor del giroscopio en rate mode
-int32_t gyroRateRaw = 0;
+int gyroRateRaw = 0;
 
 // La velocidad angular del robot medida en radianes/s
 float gyroRate = 0;
@@ -158,9 +146,32 @@ float diff;
 float gyroEstimatedAngle = 0;
 
 // Lecturas del giroscopio y los motores
-int32_t left_pos, right_pos;
+int left_pos, right_pos;
+
+
+
+
+
+
+/**
+ * Cabaceras de metodos empleados
+ */
+
+void calibrateVariables();
+void setLedsColor(int red, int green, int blue);
+void initBrick();
+void initSensors();
+void calibrateGyro();
+void readGyroAndMotors();
+void saveMotorSpeed();
+void calculateMotorSpeed();
+void motorsGo();
+void updateGyroOffset();
+void updateAcumulatedMotorError();
+
 
 int main(){
+	calibrateVariables();
 
 	printf_debuger("\n\nInit brick\n\n");
 	initBrick();
@@ -206,6 +217,44 @@ int main(){
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
 
 	return (0);
+
+
+}
+
+void calibrateVariables(){
+	// Medida del tiempo
+
+
+	loopTimeSec = loopTimeMilliSec/1000.0;
+
+
+	// Radianes por grado
+	radiansPerDegree = M_PI/180;
+
+
+	// Radianes/s por unidad del giroscopio
+	radiansPerSecondPerRawGyroUnit = degPerSecondPerRawGyroUnit * radiansPerDegree;
+
+
+	// Radianes por unidad de motor
+	radiansPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
+
+	// RPM por unidad de motor
+	RPMperPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
+
+
+	// Grados/s por velocidad
+	degPersecPerPercentSpeed = RPMperPerPercentSpeed * 360/60;
+
+	// Radianes/s por velocidad
+	radPerSecPerPercentSpeed = degPersecPerPercentSpeed * radiansPerDegree;
+
+	// Velocidad a la que compensamos el offset del giroscopio
+	gyroDriftCompensationRate = 0.1 * loopTimeSec * radiansPerSecondPerRawGyroUnit;
+
+
+
+
 
 
 }
@@ -270,7 +319,8 @@ void readGyroAndMotors(){
 	motorAngleReference = motorAngleReference + motorAngularSpeedReference * loopTimeSec;
 
 	motorAngleError = motorAngle - motorAngleReference;
-}updateGyroOffsted();
+}
+
 
 void saveMotorSpeed(){
 	//  Computing Motor Speed
@@ -321,4 +371,4 @@ void updateAcumulatedMotorError(){
 	motorAngleErrorAccumulated = motorAngleErrorAccumulated + motorAngleError * loopTimeSec;
 }
 
-}
+
