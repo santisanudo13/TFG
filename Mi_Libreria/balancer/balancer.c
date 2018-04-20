@@ -136,8 +136,8 @@ int main(void)
 	float motorAngleHistory[3];
 
 	// Ganancias de control
-	int32_t gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
-	//float gainGyroAngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
+//	int32_t gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
+	float gainGyroAngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
 
 	// Señal del ángulo del motor (en grados)
 	float motorAngleRaw = 0;
@@ -285,18 +285,11 @@ int main(void)
 
 
 	// sleep(2);
- //   	printf("Lectura gyro: %d\n", FastRead(gyroSensorValueRaw));
- //   	printf("Lectura motor1: %d\n", getPosition(motorEncoderLeft));
- //   	printf("Lectura motor2: %d\n", getPosition(motorEncoderRight));
-	// //printf("Lectura motor: %d\n", ev3_get_position(right_motor));
- //   	SetDuty(motorDutyCycleRight, 30);
-	// sleep(1);
- //   	SetDuty(motorDutyCycleRight, 0);
-	// sleep(2);
- //   	printf("Lectura motor1: %d\n", getPosition(motorEncoderLeft));
- //   	printf("Lectura motor2: %d\n", getPosition(motorEncoderRight));
+    	printf("Lectura gyro: %d\n", FastRead(gyroSensorValueRaw));
+    	printf("Lectura motor1: %d\n", getPosition(motorEncoderLeft));
+    	printf("Lectura motor2: %d\n", getPosition(motorEncoderRight));
 
-	// printf("Realizada configuración inicial\n");
+	 printf("Realizada configuración inicial\n");
 
 	// Calibración del offset del giroscopio
 	int gyroRateCalibrateCount = 100;

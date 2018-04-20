@@ -37,16 +37,15 @@
 /**
  * Sensores
  */
-#define ULTRASONIC_ADDR BANK_A_PORT_1
-#define GYRO_ADDR BANK_A_PORT_2
+#define GYRO_ADDR BANK_B_PORT_2
 #define TOUCH_ADDR BANK_B_PORT_1
 /**
  * Motores
  */
-#define MOTOR_1 BANK_A_PORT_1
-#define MOTOR_2 BANK_A_PORT_2
+#define MOTOR_1 BANK_B_PORT_1
+#define MOTOR_2 BANK_B_PORT_2
 
-#define MOTORS_BANK_A BANK_A
+#define MOTORS_BANK_B BANK_B
 
 
 
@@ -102,7 +101,7 @@ float motorAngleHistory[3];
 
 // Ganancias de control
 int gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
-//float gainGyroAngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
+//float gainGyroASngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
 
 // Señal del ángulo del motor (en grados)
 float motorAngleRaw = 0;
@@ -149,7 +148,7 @@ float gyroEstimatedAngle = 0;
 int left_pos, right_pos;
 
 
-
+struct timeval stop, start;
 
 
 
@@ -161,14 +160,14 @@ void calibrateVariables();
 void setLedsColor(int red, int green, int blue);
 void initBrick();
 void initSensors();
-void calibrateGyro();
+void calibrateGyroAndMotorEncoders();
 void readGyroAndMotors();
 void saveMotorSpeed();
 void calculateMotorSpeed();
 void motorsGo();
 void updateGyroOffset();
 void updateAcumulatedMotorError();
-
+void motorsStop();
 
 int main(){
 	calibrateVariables();
@@ -179,45 +178,57 @@ int main(){
 
 	initSensors();
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 
 	printf_debuger("\n\nPulsa el sensor tactil para comenzar\n\n");
 	while(!pistorms_is_touched(TOUCH_ADDR)){
 		i2c_delay(80);
 	}
 
-	calibrateGyro();
-
-	while(!pistorms_is_touched(TOUCH_ADDR)){
-		//Comienza el bucle
-		time(&tLoopStart);
 
 
-		readGyroAndMotors();
 
 
-		saveMotorSpeed();
 
 
-		calculateMotorSpeed();
 
-		motorsGo();
 
-		updateGyroOffset();
 
-		updateAcumulatedMotorError();
+	while(1){
+		calibrateGyroAndMotorEncoders();
 
-		//  Busy wait for the loop to complete
-		time(&tLoopEnd);
+		while(!pistorms_is_touched(TOUCH_ADDR)){
+			//Comienza el bucle
+			gettimeofday(&start, NULL);
+			time(&tLoopStart);
 
-		i2c_delay(15);
+			readGyroAndMotors();
+
+			saveMotorSpeed();
+
+			calculateMotorSpeed();
+
+			motorsGo();
+
+			updateGyroOffset();
+
+			updateAcumulatedMotorError();
+
+			//  Busy wait for the loop to complete
+			time(&tLoopEnd);
+
+			gettimeofday(&stop, NULL);
+			printf("Execution Time: %f miliseconds\n", (stop.tv_usec - start.tv_usec)/1000.0);
+
+			i2c_delay(15);
+		}
+		motorsStop();
+
+		while(!pistorms_is_touched(TOUCH_ADDR)){
+			i2c_delay(50);
+		}
 	}
-
-	pistorms_motor_brake_sync(MOTORS_BANK_A);
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
-
 	return (0);
-
 
 }
 
@@ -271,25 +282,26 @@ void initBrick(){
 }
 
 void initSensors(){
-	setLedsColor(255,0,255);
 
 	int touchID = 0;
-	int ultraID = 0;
 	int gyroID = 0;
 
-	ultraID =  pistorms_sensor_ultrasonic_configure(ULTRASONIC_ADDR);
-	printf_debuger("\n\nSensor Ultrasonido = %d \n\n",ultraID);
 
 	gyroID =  pistorms_sensor_gyro_configure(GYRO_ADDR);
-	printf_debuger("\n\nSensor Giroscopio = %d \n\n",gyroID);
+//	printf_debuger("\n\nSensor Giroscopio = %d \n\n",gyroID);
 
 	touchID =  pistorms_sensor_touch_configure(TOUCH_ADDR);
-	printf_debuger("\n\nSensor Pulsador = %d \n\n",touchID);
+//	printf_debuger("\n\nSensor Pulsador = %d \n\n",touchID);
 
 }
 
-void calibrateGyro(){
+void calibrateGyroAndMotorEncoders(){
 	setLedsColor(255,255,0);
+
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
+
+
+
 
 	int gyroRateCalibrateCount = 100;
 	int i=0;
@@ -299,21 +311,33 @@ void calibrateGyro(){
 	for(i=0; i < gyroRateCalibrateCount; i++)
 	{
 
-		gyroOffset = gyroOffset + pistorms_gyro_read(GYRO_ADDR, RATE);
-		i2c_delay(100);
+		short lectura = pistorms_gyro_read(GYRO_ADDR, RATE);
+		gyroOffset = gyroOffset + lectura;
+		i2c_delay(50);
+		printf_debuger("Lecturas Calibrate: %d\n", lectura);
+
 	}
 	gyroOffset = gyroOffset/gyroRateCalibrateCount;
-	printf("Calibración del gyro. GyroOffset: %f\n", gyroOffset);
+	printf_debuger("Calibración del gyro. GyroOffset: %f\n", gyroOffset);
 }
 
 void readGyroAndMotors(){
 	// Lectura de gyro
 	gyroRateRaw = pistorms_gyro_read(GYRO_ADDR, RATE);
+	printf_debuger("Gyro Rate Raw: %d\n", gyroRateRaw);
+
 	gyroRate = (gyroRateRaw - gyroOffset) * radiansPerSecondPerRawGyroUnit;
 
 	// Lectura de la posición del motor
-	motorAngleRaw = (pistorms_motor_get_pos(MOTOR_1) + pistorms_motor_get_pos(MOTOR_2))/2;
+	long pos1 = pistorms_motor_get_pos(MOTOR_1);
+	long pos2 = pistorms_motor_get_pos(MOTOR_2);
+
+	motorAngleRaw = (pos1 + pos2)/2;
+	printf_debuger("Motor pos1: %ld, Motors pos2: %ld\n", pos1, pos2);
+//	printf_debuger("Motor Angle Raw: %f\n", motorAngleRaw);
+
 	motorAngle = motorAngleRaw * radiansPerRawMotorUnit;
+
 
 	motorAngularSpeedReference = 0 * radPerSecPerPercentSpeed;
 	motorAngleReference = motorAngleReference + motorAngularSpeedReference * loopTimeSec;
@@ -326,12 +350,16 @@ void saveMotorSpeed(){
 	//  Computing Motor Speed
 	motorAngularSpeed = (motorAngle - motorAngleHistory[0])/(3 * loopTimeSec);
 	motorAngularSpeedError = motorAngularSpeed - motorAngularSpeedReference;
+
 	motorAngleHistory[0] = motorAngleHistory[1];
 	motorAngleHistory[1] = motorAngleHistory[2];
 	motorAngleHistory[2] = motorAngle;
 }
 
 void calculateMotorSpeed(){
+
+//	printf_debuger("\n\n\nGyro Estimated Angle: %f\nGyro Rate: %f\nMotor Angle Error: %f\nMotor Angular Speed: %f\nMotor Angle Error Accumulated: %f\n", gyroEstimatedAngle, gyroRate, motorAngleError, motorAngularSpeedError, motorAngleErrorAccumulated);
+
 	//  Computing the motor duty cycle value
 	motorDutyCycle = (gainGyroAngle  				* gyroEstimatedAngle
 			+ gainGyroRate   				* gyroRate
@@ -343,11 +371,15 @@ void calculateMotorSpeed(){
 		motorDutyCycle = 100;
 	else if(motorDutyCycle < -100)
 		motorDutyCycle = -100;
+
+
+		printf_debuger("\n\nPotencia Motores: %d\n", (int)motorDutyCycle);
+
 }
 
 void motorsGo(){
 	//  Apply the signal to the motor, and add steering
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_A);
+
 
 	pistorms_motor_set_speed(MOTOR_1, motorDutyCycle);
 	pistorms_motor_set_speed(MOTOR_2, motorDutyCycle);
@@ -355,9 +387,18 @@ void motorsGo(){
 	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
 	pistorms_motor_go(MOTOR_2 ,SPEED_GO);
 
-	setLedsColor(0,255,0);
 
-	printf("Potencia Motores: %d\n", (int)motorDutyCycle);
+}
+
+void motorsStop(){
+	//  Apply the signal to the motor, and add steering
+
+	pistorms_motor_brake_sync(MOTORS_BANK_B);
+
+
+
+	setLedsColor(255,0,0);
+
 }
 
 void updateGyroOffset(){

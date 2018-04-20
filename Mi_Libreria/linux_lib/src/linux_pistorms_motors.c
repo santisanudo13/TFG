@@ -75,7 +75,7 @@ int _set_sync_bank(int bank_id){
 
 	}else if (bank_id == BANK_A){
 
-		printf("Slave Address = A\n");
+//		printf_debuger("Slave Address = A\n");
 		i2c_setSlave(BANK_A_ADDR);
 		sync_bank = BANK_A;
 
@@ -83,7 +83,7 @@ int _set_sync_bank(int bank_id){
 
 	}else if(bank_id == BANK_B) {
 
-		printf("Slave Address = B\n");
+//		printf_debuger("Slave Address = B\n");
 		i2c_setSlave(BANK_B_ADDR);
 		sync_bank = BANK_B;
 
