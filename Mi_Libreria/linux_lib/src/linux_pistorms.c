@@ -84,7 +84,6 @@ int _set_active_bank(int connector_id){
 			i2c_setSlave(BANK_A_ADDR);
 			active_bank = BANK_A;
 
-			_reset_active_bank();
 			return PISTORMS_REASON_OK;
 		}
 
@@ -100,7 +99,6 @@ int _set_active_bank(int connector_id){
 			i2c_setSlave(BANK_B_ADDR);
 			active_bank = BANK_B;
 
-			_reset_active_bank();
 			return PISTORMS_REASON_OK;
 		}
 

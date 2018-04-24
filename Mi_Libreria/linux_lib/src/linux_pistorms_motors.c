@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include "i2c_layer.h"
 #include "linux_pistorms.h"
+#include "i2c-tools.h"
 
 
 //#define DBG
@@ -55,11 +56,9 @@
  * */
 int _set_sync_bank(int bank_id);
 
-char motor_data[32] = {0};
-int data;
+
 static char sync_bank = -1;
 
-int file;
 
 /*
  * Set the specific Bank.
@@ -75,7 +74,7 @@ int _set_sync_bank(int bank_id){
 
 	}else if (bank_id == BANK_A){
 
-//		printf_debuger("Slave Address = A\n");
+		//		printf_debuger("Slave Address = A\n");
 		i2c_setSlave(BANK_A_ADDR);
 		sync_bank = BANK_A;
 
@@ -83,7 +82,7 @@ int _set_sync_bank(int bank_id){
 
 	}else if(bank_id == BANK_B) {
 
-//		printf_debuger("Slave Address = B\n");
+		//		printf_debuger("Slave Address = B\n");
 		i2c_setSlave(BANK_B_ADDR);
 		sync_bank = BANK_B;
 
@@ -126,7 +125,7 @@ int pistorms_motor_go(int connector_id, char go ){
 
 	}
 
-	i2c_write(file, writeGo[0],writeGo[1]);
+	i2c_write(getFile(), writeGo[0],writeGo[1]);
 	return check;
 }
 
@@ -150,22 +149,22 @@ long pistorms_motor_get_pos(int connector_id){
 
 	} else {
 
-		printf("ERROR PORT");
+		printf_dbg("ERROR PORT");
 
 	}
 
 
 
-	char* value = malloc(4+1);
+	pos = i2c_smbus_read_word_data(getFile(),target);
 
-	value = i2c_read(file, target, 1);
+	long maxPos= 65535/2;
 
-	unsigned long val =  value[0] + (value[1] << 8);
+	if(pos > maxPos){
+		pos = pos - 65536;
+	}
 
 
-
-
-	return val;
+	return pos;
 
 }
 
@@ -197,7 +196,7 @@ int pistorms_motor_set_pos(int connector_id, long pos){
 
 	}
 
-	i2c_write(file, writeTarget, pos);
+	i2c_write(getFile(), writeTarget, pos);
 	return check;
 
 }
@@ -227,7 +226,7 @@ int pistorms_motor_reset_pos(int connector_id){
 		return check;
 	}
 
-	i2c_write(file, writeCMD[0],writeCMD[1]);
+	i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -245,7 +244,7 @@ int pistorms_motor_reset_all_parameters(int bank_id){
 
 
 	if ( check == 1){
-		i2c_write(file, writeCMD[0],writeCMD[1]);
+		i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 
 
 		return check;
@@ -283,7 +282,7 @@ int pistorms_motor_set_speed(int connector_id,int speed){
 
 	}
 
-	i2c_write(file, writeSpeed[0],speed);
+	i2c_write(getFile(), writeSpeed[0],speed);
 	return check;
 
 }	
@@ -313,7 +312,7 @@ int pistorms_motor_set_running_time(int connector_id, int seconds){
 		return check;
 	}
 
-	i2c_write(file, writeTime[0],seconds);
+	i2c_write(getFile(), writeTime[0],seconds);
 	return check;
 }
 
@@ -342,7 +341,7 @@ int pistorms_motor_float(int connector_id){
 		return check;
 	}
 
-	i2c_write(file, writeCMD[0],writeCMD[1]);
+	i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -360,7 +359,7 @@ int pistorms_motor_float_sync(int bank_id){
 
 	if ( check == 1){
 
-		i2c_write(file, writeCMD[0],writeCMD[1]);
+		i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 		return check;
 
 	}else{
@@ -394,7 +393,7 @@ int pistorms_motor_brake(int connector_id){
 		printf("ERROR PORT");
 		return check;
 	}
-	i2c_write(file, writeCMD[0],writeCMD[1]);
+	i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 	return check;
 }
 
@@ -411,7 +410,7 @@ int pistorms_motor_brake_sync(int bank_id){
 
 	if ( check == 1){
 
-		i2c_write(file, writeCMD[0],writeCMD[1]);
+		i2c_write(getFile(), writeCMD[0],writeCMD[1]);
 		return check;
 
 	}else{

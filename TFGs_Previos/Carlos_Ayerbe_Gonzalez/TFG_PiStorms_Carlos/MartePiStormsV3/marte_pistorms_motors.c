@@ -52,8 +52,7 @@
  * */
 int _set_sync_bank(int bank_id);
 
-char motor_data[32] = {0};
-int data;
+
 static char sync_bank = -1;
 
 

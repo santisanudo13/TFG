@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_sensors.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Drivers for sensors from Pistorms + Raspberry PI model B.
  * @version 1.0
@@ -128,7 +128,9 @@ char * pistorms_sensor_read(int connector_id){
 
 	int sensorData;
 
+
 	_set_active_bank(connector_id);
+
 
 	if((connector_id == BANK_A_PORT_1) ||(connector_id == BANK_B_PORT_1)){
 
@@ -144,7 +146,9 @@ char * pistorms_sensor_read(int connector_id){
 
 	}
 	char* value;
+
 	value = i2c_read(file, sensorData,4);
+
 	return value;
 
 

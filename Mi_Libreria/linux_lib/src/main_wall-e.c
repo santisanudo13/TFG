@@ -58,25 +58,24 @@
 
 // Medida del tiempo
 
-int loopTimeMilliSec = 10;
+int32_t loopTimeMilliSec = 15;
 
 float loopTimeSec = 0;
 
 time_t tLoopStart, tLoopEnd;
 
 int motor_speed = 20;
-#define M_PI 3.14159265358979323846
 
 // Radianes por grado
 float radiansPerDegree = 0;
 
 // Grados/s por unidad del giroscopio
-int degPerSecondPerRawGyroUnit = 1;
+int32_t degPerSecondPerRawGyroUnit = 1;
 
 // Radianes/s por unidad del giroscopio
 float radiansPerSecondPerRawGyroUnit = 0;
 // Grados por unidad de motor
-int degPerRawMotorUnit = 1;
+int32_t degPerRawMotorUnit = 1;
 
 // Radianes por unidad de motor
 float radiansPerRawMotorUnit = 0;
@@ -100,8 +99,8 @@ float gyroDriftCompensationRate = 0;
 float motorAngleHistory[3];
 
 // Ganancias de control
-int gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
-//float gainGyroASngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
+int32_t gainGyroAngle=1156, gainGyroRate=146, gainMotorAngle=7, gainMotorAngularSpeed=9, gainMotorAngleErrorAccumulated=3;
+//float gainGyroAngle=15, gainGyroRate=0.8, gainMotorAngle=0.12, gainMotorAngularSpeed=0.08, gainMotorAngleErrorAccumulated=3;
 
 // Señal del ángulo del motor (en grados)
 float motorAngleRaw = 0;
@@ -131,7 +130,7 @@ float motorAngularSpeedError = 0;
 float motorDutyCycle = 0;
 
 // El valor del giroscopio en rate mode
-int gyroRateRaw = 0;
+int32_t gyroRateRaw = 0;
 
 // La velocidad angular del robot medida en radianes/s
 float gyroRate = 0;
@@ -145,17 +144,18 @@ float diff;
 float gyroEstimatedAngle = 0;
 
 // Lecturas del giroscopio y los motores
-int left_pos, right_pos;
+int i=0;
 
 
 struct timeval stop, start;
 
+struct timespec fin;
 
 
 /**
  * Cabaceras de metodos empleados
  */
-
+void test();
 void calibrateVariables();
 void setLedsColor(int red, int green, int blue);
 void initBrick();
@@ -172,65 +172,51 @@ void motorsStop();
 int main(){
 	calibrateVariables();
 
-	printf_debuger("\n\nInit brick\n\n");
+	//	printf_debuger("\n\nInit brick\n\n");
 	initBrick();
-	printf_debuger("\n\nInit sensores\n\n");
+	//	printf_debuger("\n\nInit sensores\n\n");
 
 	initSensors();
 
 	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 
-	printf_debuger("\n\nPulsa el sensor tactil para comenzar\n\n");
+
+	//	printf_debuger("\n\nPulsa el sensor tactil para comenzar\n\n");
 	while(!pistorms_is_touched(TOUCH_ADDR)){
 		i2c_delay(80);
 	}
 
 
-
-
-
-
-
-
-
+	//	test();
 
 	while(1){
 		calibrateGyroAndMotorEncoders();
-
 		while(1){
+			//Hacemos que cada ciclo dure 15ms desde que comienza hasta que termine realizando un sleep relativo.
+			//Con un baudrate de 50000 la raspberry, cada iteracion sin sleep son unos 6-9ms
+
+			clock_gettime(CLOCK_MONOTONIC, &fin);
+			fin.tv_nsec += 15000000;
+
 			if(pistorms_is_touched(TOUCH_ADDR)){
-				i2c_delay(1000);
+				i2c_delay(300);
 				break;
 			}
 
 			//Comienza el bucle
-//			time(&tLoopStart);
-			gettimeofday(&start, NULL);
+			time(&tLoopStart);
 
 			readGyroAndMotors();
-
-
 			saveMotorSpeed();
-
 			calculateMotorSpeed();
-
 			motorsGo();
-
-
 			updateGyroOffset();
-
-
 			updateAcumulatedMotorError();
 
-			//  Busy wait for the loop to complete
-
-//			gettimeofday(&stop, NULL);
 			time(&tLoopEnd);
-
-
-//			printf("Execution Time: %f miliseconds\n", (stop.tv_usec - start.tv_usec)/1000.0);
-
+			clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &fin, NULL);
 		}
+
 		motorsStop();
 
 		while(!pistorms_is_touched(TOUCH_ADDR)){
@@ -238,30 +224,44 @@ int main(){
 		}
 	}
 	return (0);
+}
+
+void test(){
+	pistorms_motor_reset_all_parameters(BANK_B);
+	pistorms_motor_reset_pos(MOTOR_1);
+
+
+	long pos = pistorms_motor_get_pos(MOTOR_1);
+	//	printf_debuger("POS: %ld\n",pos);
+
+
+	pistorms_motor_set_speed(MOTOR_1, 5);
+	pistorms_motor_go(MOTOR_1 ,SPEED_GO);
+
+	while(1){
+		pos = pistorms_motor_get_pos(MOTOR_1);
+		//		printf_debuger("POS: %ld\n",pos);
+
+	}
 
 }
 
 void calibrateVariables(){
 	// Medida del tiempo
 
-
 	loopTimeSec = loopTimeMilliSec/1000.0;
-
 
 	// Radianes por grado
 	radiansPerDegree = M_PI/180;
 
-
 	// Radianes/s por unidad del giroscopio
 	radiansPerSecondPerRawGyroUnit = degPerSecondPerRawGyroUnit * radiansPerDegree;
-
 
 	// Radianes por unidad de motor
 	radiansPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
 
 	// RPM por unidad de motor
 	RPMperPerRawMotorUnit = degPerRawMotorUnit * radiansPerDegree;
-
 
 	// Grados/s por velocidad
 	degPersecPerPercentSpeed = RPMperPerPercentSpeed * 360/60;
@@ -271,12 +271,6 @@ void calibrateVariables(){
 
 	// Velocidad a la que compensamos el offset del giroscopio
 	gyroDriftCompensationRate = 0.1 * loopTimeSec * radiansPerSecondPerRawGyroUnit;
-
-
-
-
-
-
 }
 
 void setLedsColor(int red, int green, int blue){
@@ -295,24 +289,20 @@ void initSensors(){
 	int touchID = 0;
 	int gyroID = 0;
 
-
 	gyroID =  pistorms_sensor_gyro_configure(GYRO_ADDR);
 	//	printf_debuger("\n\nSensor Giroscopio = %d \n\n",gyroID);
 
 	touchID =  pistorms_sensor_touch_configure(TOUCH_ADDR);
 	//	printf_debuger("\n\nSensor Pulsador = %d \n\n",touchID);
-
 }
 
 void calibrateGyroAndMotorEncoders(){
 	setLedsColor(255,255,0);
 
-	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
+	pistorms_motor_reset_pos(MOTOR_1);
+	pistorms_motor_reset_pos(MOTOR_2);
 
-
-
-
-	int gyroRateCalibrateCount = 100;
+	int gyroRateCalibrateCount = 3000;
 	int i=0;
 
 	pistorms_gyro_set_mode(GYRO_ADDR, RATE);
@@ -322,8 +312,7 @@ void calibrateGyroAndMotorEncoders(){
 
 		short lectura = pistorms_gyro_read(GYRO_ADDR, RATE);
 		gyroOffset = gyroOffset + lectura;
-		i2c_delay(50);
-		//		printf_debuger("Lecturas Calibrate: %d\n", lectura);
+				printf_debuger("Lecturas Calibrate: %d\n", lectura);
 
 	}
 	gyroOffset = gyroOffset/gyroRateCalibrateCount;
@@ -334,13 +323,12 @@ void readGyroAndMotors(){
 	// Lectura de gyro
 	gyroRateRaw = pistorms_gyro_read(GYRO_ADDR, RATE);
 
-	//	printf_debuger("Gyro Rate Raw: %d\n", gyroRateRaw);
+	//	printf_debuger("\nGyro Rate Raw: %d\n", gyroRateRaw);
 
 	gyroRate = (gyroRateRaw - gyroOffset) * radiansPerSecondPerRawGyroUnit;
 
 	// Lectura de la posición del motor
 	long pos1 = pistorms_motor_get_pos(MOTOR_1);
-
 	long pos2 = pistorms_motor_get_pos(MOTOR_2);
 
 	motorAngleRaw = (pos1 + pos2)/2;
@@ -349,14 +337,11 @@ void readGyroAndMotors(){
 
 	motorAngle = motorAngleRaw * radiansPerRawMotorUnit;
 
-
 	motorAngularSpeedReference = 0 * radPerSecPerPercentSpeed;
 	motorAngleReference = motorAngleReference + motorAngularSpeedReference * loopTimeSec;
 
 	motorAngleError = motorAngle - motorAngleReference;
-
 }
-
 
 void saveMotorSpeed(){
 	//  Computing Motor Speed
@@ -369,15 +354,14 @@ void saveMotorSpeed(){
 }
 
 void calculateMotorSpeed(){
-
-	//	printf_debuger("\n\n\nGyro Estimated Angle: %f\nGyro Rate: %f\nMotor Angle Error: %f\nMotor Angular Speed: %f\nMotor Angle Error Accumulated: %f\n", gyroEstimatedAngle, gyroRate, motorAngleError, motorAngularSpeedError, motorAngleErrorAccumulated);
+		printf_debuger("---------------------\nGyro Estimated Angle: %f\nGyro Rate: %f\nMotor Angle Error: %f\nMotor Angular Speed: %f\nMotor Angle Error Accumulated: %f\n---------------------\n", gyroEstimatedAngle, gyroRate, motorAngleError, motorAngularSpeedError, motorAngleErrorAccumulated);
 
 	//  Computing the motor duty cycle value
-	motorDutyCycle = (gainGyroAngle  				* gyroEstimatedAngle
-			+ gainGyroRate   				* gyroRate
-			+ gainMotorAngle 				* motorAngleError
+	motorDutyCycle =(gainGyroAngle  					* gyroEstimatedAngle
+			+ gainGyroRate   					* gyroRate
+			+ gainMotorAngle 					* motorAngleError
 			+ gainMotorAngularSpeed 			* motorAngularSpeedError
-			+ gainMotorAngleErrorAccumulated * motorAngleErrorAccumulated);
+			+ gainMotorAngleErrorAccumulated 	* motorAngleErrorAccumulated);
 
 	if(motorDutyCycle > 100)
 		motorDutyCycle = 100;
@@ -385,7 +369,7 @@ void calculateMotorSpeed(){
 		motorDutyCycle = -100;
 
 
-	printf_debuger("\n\nPotencia Motores: %d\n", (int)motorDutyCycle);
+	//	printf_debuger("Potencia Motores: %d\n", (int)motorDutyCycle);
 
 }
 
@@ -407,8 +391,7 @@ void motorsStop(){
 
 	pistorms_motor_brake_sync(MOTORS_BANK_B);
 
-
-
+	pistorms_motor_reset_all_parameters(MOTORS_BANK_B);
 	setLedsColor(255,0,0);
 
 }
@@ -421,6 +404,7 @@ void updateGyroOffset(){
 
 void updateAcumulatedMotorError(){
 	//  Update Accumulated Motor Error
+
 	motorAngleErrorAccumulated = motorAngleErrorAccumulated + motorAngleError * loopTimeSec;
 }
 

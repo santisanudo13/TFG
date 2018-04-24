@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_motors.h
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Drivers for motors from Pistorms + Raspberry PI model B.
  * @version 1.0

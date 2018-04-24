@@ -46,12 +46,11 @@ int getFile(){
  */
 
 char* i2c_read(int file, int command, int size){
-//	printf_dbg("I2C Read\n");
+	//	printf_dbg("I2C Read\n");
 
-	char* output = malloc(size+1);
 
+	char* output = malloc(size);
 	int numBytes = i2c_smbus_read_i2c_block_data(file, command, size, output);
-
 
 	if(numBytes == -1){
 		printf("ERROR en la lectura\n");
@@ -71,7 +70,7 @@ char* i2c_read(int file, int command, int size){
  */
 
 int i2c_write(int file,int command, int value){
-//	printf_dbg("I2C Write\n");
+	//	printf_dbg("I2C Write\n");
 
 	int output = i2c_smbus_write_byte_data(file,command,value);
 
@@ -122,7 +121,7 @@ int i2c_close(){
  */
 
 int i2c_setSlave(int addr){
-//	printf_dbg("I2C Set Slave\n");
+	//	printf_dbg("I2C Set Slave\n");
 
 	if(ioctl(file,I2C_SLAVE, addr) < 0){
 		printf("Fallo al cambiar la direccion del I2C_SLAVE\n");
@@ -135,9 +134,9 @@ int i2c_setSlave(int addr){
 void i2c_delay(int millis){
 	struct timespec sleeper;
 
-	    sleeper.tv_sec  = (time_t)(millis / 1000);
-	    sleeper.tv_nsec = (long)(millis % 1000) * 1000000;
-	    nanosleep(&sleeper, NULL);
+	sleeper.tv_sec  = (time_t)(millis / 1000);
+	sleeper.tv_nsec = (long)(millis % 1000) * 1000000;
+	nanosleep(&sleeper, NULL);
 }
 
 
