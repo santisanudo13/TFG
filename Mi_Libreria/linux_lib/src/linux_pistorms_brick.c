@@ -1,6 +1,6 @@
 /**
  * @file linux_pistorms_brick.c
- * @author Santiago Sañudo Martínez
+ * @author Santiago Saï¿½udo Martï¿½nez
  * @date 5 Mar 2018
  * @brief Driver for control the Touch of EV3 Sensor.
  * @version 1.0
@@ -18,7 +18,6 @@
 #include "linux_pistorms.h"
 
 
-//#define DBG
 #include "linux_pistorms_internal.h"
 
 /**

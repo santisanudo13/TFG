@@ -100,7 +100,6 @@ short pistorms_gyro_read(int connector_id, int mode){
 	}
 	gyro_data = pistorms_sensor_read(connector_id);
 
-
 	unsigned short gyro =  gyro_data[0] + ( gyro_data[1] << 8);
 	short gyro_final = (short)gyro;
 
